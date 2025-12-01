@@ -79,36 +79,36 @@ jobs:
             echo "file_summary=$FILE" >> $GITHUB_OUTPUT
           fi
 
-      # Generar la tabla HTML usando lo encontrado (si hay)
-      - name: 📝 Generar tabla HTML de resultados
+      - name: 📝 Generar tabla HTML de resultados (desde archivos HTML)
         id: table
         run: |
-          FILE="${{ steps.detect.outputs.file_summary }}"
+          REPORT_DIR="target/karate-reports"
 
-          if [ -z "$FILE" ]; then
-            echo "<p>No se encontró archivo de resumen. No hay escenarios para mostrar.</p>" > table.html
-          else
-            echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
-            echo "<tr style='background:#f2f2f2;'><th>Escenario</th><th>Estado</th></tr>" >> table.html
+          echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
+          echo "<tr style='background:#f2f2f2;'><th>Escenario</th><th>Estado</th></tr>" >> table.html
 
-            cat "$FILE" | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end), (.duration // "")] | @tsv' | \
-            while IFS=$'\t' read -r name status duration; do
+          # Buscar escenarios dentro de los HTML
+          for f in $(find $REPORT_DIR -name "*.html"); do
+            grep -oP '(?<=scenario-name">).*?(?=</)' "$f" > names.txt
+            grep -oP '(?<=scenario-status ).*?(?=")' "$f" > status.txt
+
+            paste names.txt status.txt | while IFS=$'\t' read -r name status; do
+              STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
               COLOR="red"
-              [[ "$status" == "PASSED" ]] && COLOR="green"
-              DURATION_CELL=""
-              if [ -n "$duration" ]; then
-                DURATION_CELL="<td>$duration ms</td>"
-              fi
-              echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td>$DURATION_CELL</tr>" >> table.html
-            done
+              [[ "$STATUS_UPPER" == "PASSED" ]] && COLOR="green"
 
-            echo "</table>" >> table.html
-          fi
+              echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$STATUS_UPPER</td></tr>" >> table.html
+            done
+          done
+
+          rm -f names.txt status.txt || true
+          echo "</table>" >> table.html
 
           SUMMARY=$(cat table.html)
           echo "summary_table<<EOF" >> $GITHUB_OUTPUT
           echo "$SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
 
       # Crear una carpeta con SOLO los archivos del reporte (para evitar nested-zip)
       - name: 📁 Empaquetar únicamente los archivos del reporte (sin .jar/.class/etc)
