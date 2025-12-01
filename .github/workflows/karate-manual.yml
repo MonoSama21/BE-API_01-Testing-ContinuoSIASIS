@@ -71,26 +71,35 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: 📦 Comprimir reportes sin archivos bloqueados por Gmail
+      - name: 📦 Crear ZIP seguro del reporte Karate
         run: |
-            mkdir safe-report
-            cp target/karate-reports/karate-summary.html safe-report/
+            mkdir karate-report-safe
 
-            # copiar solo las carpetas necesarias
-            if [ -d "target/karate-reports/karate-summary" ]; then
-            cp -r target/karate-reports/karate-summary safe-report/
-            fi
+            # Copiar archivos principales
+            cp target/karate-reports/karate-summary.html karate-report-safe/
+            cp target/karate-reports/karate-summary-json.txt karate-report-safe/
+            cp target/karate-reports/karate-tags.html karate-report-safe/
+            cp target/karate-reports/karate-timeline.html karate-report-safe/
+            cp target/karate-reports/karate-logo.png karate-report-safe/
+            cp target/karate-reports/karate-logo.svg karate-report-safe/
+            cp target/karate-reports/karate-labs-logo-ring.svg karate-report-safe/
+            cp target/karate-reports/favicon.ico karate-report-safe/
 
-            # Crear ZIP sin archivos ejecutables
-            zip -r karate-report.zip safe-report/ \
+            # Copiar todos los HTML generados por cada feature
+            cp target/karate-reports/*.html karate-report-safe/ || true
+
+            # Copiar carpeta res donde están CSS / JS / imágenes
+            cp -r target/karate-reports/res karate-report-safe/
+
+            # Crear ZIP sin archivos peligrosos
+            zip -r karate-report.zip karate-report-safe/ \
             -x "*.jar" \
             -x "*.class" \
             -x "*.exe" \
             -x "*.sh" \
             -x "*.bat" \
-            -x "*.cmd" \
-            -x "*.json" \
-            -x "*.js"
+            -x "*.cmd"
+
 
 
       # 7. Subir ZIP como artefacto
