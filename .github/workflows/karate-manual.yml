@@ -93,13 +93,11 @@ jobs:
             # Extraer nombres de escenarios (sed en vez de grep -P)
             sed -n 's/.*scenario-name">\(.*\)<\/.*/\1/p' "$f" > names.txt
 
-            # Extraer estados (passed / failed)
-            sed -n 's/.*scenario-status \([^"]*\)".*/\1/p' "$f" > status.txt
+            # Estado del escenario (passed / failed)
+            grep -oP '(?<=class="status ).*?(?=")' "$f" > status.txt
 
-            # Combinar ambos
             paste names.txt status.txt | while IFS=$'\t' read -r name status; do
               STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
-
               COLOR="red"
               [[ "$STATUS_UPPER" == "PASSED" ]] && COLOR="green"
 
