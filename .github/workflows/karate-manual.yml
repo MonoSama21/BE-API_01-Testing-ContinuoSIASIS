@@ -15,6 +15,10 @@ on:
           - DEV
           - QA
         default: QA
+      correo:
+        description: "Correo donde se enviará la notificación"
+        required: true
+        type: string
 
 jobs:
   run-karate-tests:
@@ -22,6 +26,27 @@ jobs:
     timeout-minutes: 30
 
     steps:
+
+      # ---------- 0. Notificación antes ----------
+      - name: ✉️ Enviar notificación ANTES de ejecutar pruebas
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "⚠️ Inicio de ejecución Karate – Tag: ${{ github.event.inputs.tag }}"
+          to: ${{ github.event.inputs.correo }}
+          from: "GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
+          body: |
+            Hola,
+
+            Se iniciará la ejecución de pruebas Karate.
+            • Tag: ${{ github.event.inputs.tag }}
+            • Ambiente: ${{ github.event.inputs.ambiente }}
+            • Fecha/Hora: $(date)
+
+            Te avisaré nuevamente cuando finalicen las pruebas.
 
       # 1. Descargar código
       - name: 📥 Checkout del repositorio
@@ -53,3 +78,31 @@ jobs:
           name: karate-report
           path: target/
           retention-days: 14
+
+      # ---------- 7. Notificación después ----------
+      - name: ✉️ Enviar notificación DESPUÉS de ejecutar pruebas
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          to: ${{ github.event.inputs.correo }}
+          from: "GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
+          subject: "✅ Pruebas Karate finalizadas – Tag: ${{ github.event.inputs.tag }}"
+          body: |
+            Hola,
+
+            Las pruebas Karate han finalizado.
+
+            • Tag ejecutado: ${{ github.event.inputs.tag }}
+            • Ambiente: ${{ github.event.inputs.ambiente }}
+            • Estado: Completado
+            • Fecha/Hora: $(date)
+
+            Se adjunta el reporte generado.
+
+          attachments: |
+            target/karate-reports/karate-summary.html
+            target/surefire-reports/*.txt
+            target/karate-reports/*.html
