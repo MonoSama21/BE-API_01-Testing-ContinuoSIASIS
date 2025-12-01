@@ -71,7 +71,7 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      # ---------- 6. Detectar archivo JSON de resumen ----------
+# ---------- 6. Detectar archivo JSON de resumen ----------
       - name: 🔍 Detectar archivo de resumen Karate
         id: detect
         run: |
@@ -84,32 +84,30 @@ jobs:
             echo "file_summary=$FILE" >> $GITHUB_OUTPUT
           fi
 
-      # ---------- 7. Crear Tabla HTML ----------
-      - name: 📝 Generar tabla HTML de resultados
+  
+    # 👉 Convertir karate-summary-json.txt en una tabla HTML para Gmail
+      - name: Generate Email Summary Table
         id: table
         run: |
-          FILE="${{ steps.detect.outputs.file_summary }}"
+          JSON_FILE="target/karate-reports/karate-summary-json.txt"
 
-          # Si no existe el archivo JSON → tabla vacía
-          if [ -z "$FILE" ]; then
-            echo "<p>No se encontró karate-summary-json.txt. No hay escenarios para mostrar.</p>" > table.html
-          else
-            echo "<table border='1' cellspacing='0' cellpadding='6'>" > table.html
-            echo "<tr><th>Escenario</th><th>Estado</th></tr>" >> table.html
+          echo "<table border='1' cellspacing='0' cellpadding='6'>" > table.html
+          echo "<tr><th>Escenario</th><th>Estado</th></tr>" >> table.html
 
-            cat "$FILE" | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end)] | @tsv' | \
-            while IFS=$'\t' read -r name status; do
-              COLOR="red"
-              [[ "$status" == "PASSED" ]] && COLOR="green"
-              echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td></tr>" >> table.html
-            done
+          cat $JSON_FILE | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end)] | @tsv' | \
+          while IFS=$'\t' read -r name status; do
+            COLOR="red"
+            [[ "$status" == "PASSED" ]] && COLOR="green"
 
-            echo "</table>" >> table.html
-          fi
+            echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td></tr>" >> table.html
+          done
 
-          SUMMARY=$(cat table.html)
+          echo "</table>" >> table.html
+
+          SUMMARY_TABLE=$(cat table.html)
+          # Exportar para usar en el correo
           echo "summary_table<<EOF" >> $GITHUB_OUTPUT
-          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "$SUMMARY_TABLE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       # ---------- 8. Crear ZIP del reporte ----------
@@ -122,7 +120,7 @@ jobs:
             echo "⚠️ No existe la carpeta target/karate-reports"
           fi
 
-      # ---------- 9. Subir artefacto ZIP ----------
+      # 7. Subir ZIP como artefacto
       - name: 📤 Subir reporte ZIP como artefacto
         uses: actions/upload-artifact@v4
         with:
@@ -130,7 +128,7 @@ jobs:
           path: karate-report.zip
           retention-days: 14
 
-      # ---------- 10. Notificación final ----------
+# ---------- 10. Notificación final ----------
       - name: ✉️ Notificar FIN de ejecución (sin adjuntos)
         if: always()
         uses: dawidd6/action-send-mail@v3
