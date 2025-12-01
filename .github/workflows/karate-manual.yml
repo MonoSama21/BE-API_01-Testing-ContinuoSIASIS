@@ -66,19 +66,7 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: 🔍 Detectar archivo de resumen Karate
-        id: detect
-        run: |
-          FILE=$(find target -type f -name "karate-summary-json.txt" -o -name "karate-summary.json" | head -n 1)
-          if [ -z "$FILE" ]; then
-            echo "⚠️ No se encontró karate-summary-json.txt ni karate-summary.json"
-            echo "file_summary=" >> $GITHUB_OUTPUT
-          else
-            echo "Resumen encontrado en: $FILE"
-            echo "file_summary=$FILE" >> $GITHUB_OUTPUT
-          fi
-
-      - name: 📝 Generar tabla HTML de resultados (desde HTML Karate)
+      - name: 📝 Generar tabla HTML de resultados
         id: table
         run: |
           REPORT_DIR="target/karate-reports"
@@ -88,13 +76,14 @@ jobs:
 
           for f in $(find "$REPORT_DIR" -type f -name "*.html"); do
 
-            # Extrae nombres de escenarios
-            sed -n 's/.*scenario-name">\(.*\)<\/.*/\1/p' "$f" > names.txt
+            # Extraer nombres REALES del escenario
+            sed -n 's/.*scenario-label">Scenario: \(.*\)<\/.*/\1/p' "$f" > names.txt
 
-            # Extrae estado correcto (class="status passed" o "status failed")
-            sed -n 's/.*class="status \([^"]*\)".*/\1/p' "$f" > status.txt
+            # Extraer estados reales: class="scenario-status passed" / "failed"
+            sed -n 's/.*scenario-status \([^"]*\)".*/\1/p' "$f" > status.txt
 
             paste names.txt status.txt | while IFS=$'\t' read -r name status; do
+
               STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
 
               COLOR="red"
@@ -117,15 +106,8 @@ jobs:
         run: |
           rm -rf karate-report-package || true
           mkdir karate-report-package
-
-          if [ -d "target/karate-reports" ]; then
-            cp -r target/karate-reports/* karate-report-package/
-          fi
-
+          cp -r target/karate-reports/* karate-report-package/ || true
           find karate-report-package -type f \( -iname "*.jar" -o -iname "*.class" -o -iname "*.exe" -o -iname "*.bat" -o -iname "*.cmd" \) -delete || true
-
-          echo "Contenido final:"
-          ls -R karate-report-package
 
       - name: 📤 Subir reporte como artefacto ZIP único
         uses: actions/upload-artifact@v4
@@ -134,7 +116,7 @@ jobs:
           path: karate-report-package
           retention-days: 14
 
-      - name: ✉️ Notificar FIN de ejecución (con tabla y link)
+      - name: ✉️ Notificar FIN de ejecución
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
