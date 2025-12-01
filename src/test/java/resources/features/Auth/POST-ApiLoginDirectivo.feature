@@ -1,7 +1,7 @@
-Feature: Login Directivo
+Feature: Login de usuario directivo
 
 Background: Pre-Condiciones
-    * url "https://api01-siasis-cert.vercel.app"
+    * url urlBase
     * header Content-Type = "application/json"
 
 Scenario: Validar que el directivo puede hacer un login exitoso
