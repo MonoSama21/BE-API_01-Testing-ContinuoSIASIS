@@ -36,5 +36,8 @@ function fn() {
   var statusEnv = configEnv();
   karate.configure('connectTimeout', 5000);
 	karate.configure('readTimeout', 5000);
+  karate.configure('logPrettyRequest', true);
+	karate.configure('logPrettyResponse', true);
+	
   return statusEnv;
 }
