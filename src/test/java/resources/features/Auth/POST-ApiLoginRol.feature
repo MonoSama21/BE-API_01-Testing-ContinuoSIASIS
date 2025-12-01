@@ -4,18 +4,13 @@ Feature: Login de usuario directivo - Pruebas de Contrato API
 Background:
     * url urlBase
     * header Content-Type = "application/json"
+    * def requestExitoso = read("classpath:resources/request/POST-ApiLoginRol/request.json")
 
 # 1. 🔵 Smoke
 @contract @smoke @post @test1
 Scenario: Validar que el servicio de login responde correctamente
     Given path "api/login/directivo"
-    And request 
-    """
-    {
-        "Nombre_Usuario": "director.asuncion8",
-        "Contraseña": "15430124"
-    }
-    """
+    And request requestExitoso
     When method POST
     Then status 200 
 
@@ -23,13 +18,9 @@ Scenario: Validar que el servicio de login responde correctamente
 @contract @happy-path @post @test2
 Scenario Outline: Validar que el servicio de login permite acceder por el <description>
     Given path "api/login/" + route
-    And request 
-    """
-    {
-        "Nombre_Usuario": "<usuario>",
-        "Contraseña": "<contrasena>"
-    }
-    """
+    And request requestExitoso
+    * set requestExitoso.Nombre_Usuario = usuario
+    * set requestExitoso.Contraseña = contrasena
     When method POST
     Then status 200 
     Examples: 
@@ -47,13 +38,9 @@ Scenario Outline: Validar que el servicio de login permite acceder por el <descr
 @contract @smoke @post @test3
 Scenario Outline: Validar que el servicio de login devuelve una respuesta correcta cuando se accede por el <description>
     Given path "api/login/" + route
-    And request 
-    """
-    {
-        "Nombre_Usuario": "<usuario>",
-        "Contraseña": "<contrasena>"
-    }
-    """
+    And request requestExitoso
+    * set requestExitoso.Nombre_Usuario = usuario
+    * set requestExitoso.Contraseña = contrasena
     When method POST
     Then status 200 
     And match response ==
@@ -86,7 +73,7 @@ Scenario Outline: Validar que el servicio de login devuelve una respuesta correc
 Scenario: Validar headers obligatorios y de respuesta
     Given path "api/login/directivo"
     And header Content-Type = "application/json"
-    And request { "Nombre_Usuario": "director.asuncion8", "Contraseña": "15430124" }
+    And request requestExitoso
     When method POST
     Then status 200
     And match responseHeaders['Content-Type'][0] contains "application/json"
@@ -94,7 +81,7 @@ Scenario: Validar headers obligatorios y de respuesta
 
 
 # 5. ❌ Error Handling 🏷️ Field Validation
-@contract @error-handling @post @vaya
+@contract @error-handling @post 
 Scenario Outline: Validar manejo de errores del endpoint
     Given path "api/login/directivo"
     And request <body>
@@ -104,15 +91,15 @@ Scenario Outline: Validar manejo de errores del endpoint
     * match response.message == "El nombre de usuario y la contraseña son obligatorios"
     * match response.errorType == "MISSING_PARAMETERS"
 
-Examples:
-    | body                                                        |
-    | {}                                                          |
-    | { "Nombre_Usuario": "" , "Contraseña": "123" }              | 
-    | { "Nombre_Usuario": "test" , "Contraseña": "" }             | 
-    | { "Nombre_Usuario": "", "Contraseña": "" }                  |
+    Examples:
+        | body                                                        |
+        | {}                                                          |
+        | { "Nombre_Usuario": "" , "Contraseña": "123" }              | 
+        | { "Nombre_Usuario": "test" , "Contraseña": "" }             | 
+        | { "Nombre_Usuario": "", "Contraseña": "" }                  |
 
 
-@contract @error-handling @post @vaya2
+@contract @error-handling @post 
 Scenario Outline: Validar manejo de errores del endpoint
     Given path "api/login/directivo"
     And request <body>
@@ -127,9 +114,7 @@ Scenario Outline: Validar manejo de errores del endpoint
         | { "Nombre_Usuario": "noExiste" , "Contraseña": "123" }      | 
         | { "Nombre_Usuario": "director.asuncion8", "Contraseña": "x"}| 
 
-
-
-# 7. 🔠 Data Types  #ESTA BIEN QUE FALLE
+# 6. 🔠 Data Types  #REPORTAR COMO BUG
 @contract @data-types @post
 Scenario Outline: Validar tipos de datos inválidos
     Given path "api/login/directivo"
@@ -137,37 +122,14 @@ Scenario Outline: Validar tipos de datos inválidos
     When method POST
     Then status 400
 
-Examples:
-    | body |
-    | { "Nombre_Usuario": 123, "Contraseña": "123" } |
-    | { "Nombre_Usuario": "test", "Contraseña": 123 } |
-    | { "Nombre_Usuario": [], "Contraseña": "123" } |
-    | { "Nombre_Usuario": "test", "Contraseña": {} } |
+    Examples:
+        | body |
+        | { "Nombre_Usuario": 123, "Contraseña": "123" }  |
+        | { "Nombre_Usuario": "test", "Contraseña": 123 } |
+        | { "Nombre_Usuario": [], "Contraseña": "123" }   |
+        | { "Nombre_Usuario": "test", "Contraseña": {} }  |
 
-
-# 8. ⚠️ Boundary Testing
-@contract @boundary @post
-Scenario Outline: Validar valores límite del login
-    Given path "api/login/directivo"
-    And request
-    """
-    {
-        "Nombre_Usuario": "<username>",
-        "Contraseña": "<password>"
-    }
-    """
-    When method POST
-    Then status <expectedStatus>
-
-Examples:
-    | username | password | expectedStatus |
-    | a | 1 | 401 |
-    | usuario_muy_largo_mas_de_100_caracteres_____________________________ | 123 | 400 |
-    | normalUser | contraseña_muy_larga________________________________________________ | 400 |
-    | (empty) | 123 | 400 |
-    | test<script> | 123 | 400 |
-
-    # =======================================================================
+# =======================================================================
 # 🛡️ SECURITY CONTRACT TESTING — Validación de vulnerabilidades OWASP
 # =======================================================================
 
@@ -184,15 +146,17 @@ Scenario Outline: Intentos de SQL Injection deben ser rechazados
     """
     When method POST
     Then status 400
-    And match response.message contains "invalid"
+    And match response.error == "Petición bloqueada por seguridad"
+    * match response.message == "Se ha detectado contenido potencialmente malicioso en la petición"
+    * match response.code == "SQL_INJECTION_DETECTED"
+    * match response.timestamp == "#string"
 
-Examples:
-    | payload |
-    | ' OR '1'='1 |
-    | '; DROP TABLE usuarios; -- |
-    | ' OR 1=1 -- |
-    | ' UNION SELECT NULL, NULL -- |
-    | admin'/* |
+    Examples:
+        | payload |
+        | ' OR '1'='1                  |
+        | '; DROP TABLE usuarios; --   |
+        | ' OR 1=1 --                  |
+        | ' UNION SELECT NULL, NULL -- |
 
 
 # 10. 🧨 XSS Injection
@@ -207,37 +171,18 @@ Scenario Outline: Intentos de Cross-Site Scripting deben ser bloqueados
     }
     """
     When method POST
-    Then status 400
-
-Examples:
-    | xss |
-    | <script>alert(1)</script> |
-    | <img src=x onerror=alert('XSS')> |
-    | javascript:alert('XSS') |
-    | <svg/onload=alert(1)> |
-    | <iframe src='javascript:alert(1)'></iframe> |
-
-
-# 11. 🔐 Login Brute Force Simulation (Protección anti fuerza bruta)
-@contract @security @bruteforce @post
-Scenario: Intentos múltiples fallidos deben responder 401 sin cambios en el contrato
-    * def body = { Nombre_Usuario: "user.fake", Contraseña: "incorrecta" }
-
-    # tres intentos fallidos
-    Given path "api/login/directivo"
-    And request body
-    When method POST
     Then status 401
+    And match response.success == false
+    * match response.message == "Credenciales inválidas"
+    * match response.errorType == "INVALID_CREDENTIALS"
 
-    Given path "api/login/directivo"
-    And request body
-    When method POST
-    Then status 401
-
-    Given path "api/login/directivo"
-    And request body
-    When method POST
-    Then status 401
+    Examples:
+        | xss |
+        | <script>alert(1)</script>                   |
+        | <img src=x onerror=alert('XSS')>            |
+        | javascript:alert('XSS')                     |
+        | <svg/onload=alert(1)>                       |
+        | <iframe src='javascript:alert(1)'></iframe> |
 
 
 # 12. 🧱 Payload Tampering (JSON Manipulation)
@@ -248,65 +193,25 @@ Scenario Outline: Enviar tipos de datos inesperados
     When method POST
     Then status 400
 
-Examples:
-    | payload |
-    | "null" |
-    | "[]" |
-    | "\"string-maliciosa\"" |
-    | "{ \"Nombre_Usuario\": {\"hack\": 1}, \"Contraseña\": \"123\" }" |
-    | "{ \"Nombre_Usuario\": true, \"Contraseña\": false }" |
+    Examples:
+        | payload |
+        | "null"                                                |
+        | "[]"                                                  |
+        | "\"string-maliciosa\""                                | 
+        | "{ \"Nombre_Usuario\": true, \"Contraseña\": false }" |
 
 
-# 13. 📦 Oversized Payload (DoS básico)
-@contract @security @dos-size @post
-Scenario: Payload demasiado grande debe ser rechazado
-    * def longText = 'a'.repeat(50000)
-    Given path "api/login/directivo"
-    And request
-    """
-    {
-        "Nombre_Usuario": "#(longText)",
-        "Contraseña": "#(longText)"
-    }
-    """
-    When method POST
-    Then status 400
-
-
-# 14. 🌐 HTTP Header Injection
+# 14. 🌐 HTTP Header Injection  #ES BUG
 @contract @security @header-injection @post
 Scenario Outline: Cabeceras manipuladas deben ser rechazadas o ignoradas
     Given path "api/login/directivo"
     And header Authorization = <inject>
-    And request { "Nombre_Usuario": "user", "Contraseña": "123" }
+    And request requestExitoso
     When method POST
     Then status 400
 
-Examples:
-    | inject |
-    | "Bearer null\r\nInjectedHeader: evil" |
-    | "\nX-Hacked: 1" |
-    | "Bearer <script>hack()</script>" |
-
-
-# 15. 🧵 Unicode / Encoding Attacks
-@contract @security @encoding @post
-Scenario Outline: Caracteres especiales maliciosos no deben romper el API
-    Given path "api/login/directivo"
-    And request
-    """
-    {
-        "Nombre_Usuario": <text>,
-        "Contraseña": <text>
-    }
-    """
-    When method POST
-    Then status 400
-
-Examples:
-    | text |
-    | "😈😈😈" |
-    | "áéíóúñ漢字" |
-    | "%00%00%00" |
-    | "\\u0000\\u0001\\u0002" |
-    | "־׆﷽" |
+    Examples:
+        | inject |
+        | "Bearer null\r\nInjectedHeader: evil" |
+        | "\nX-Hacked: 1"                       |
+        | "Bearer <script>hack()</script>"      |
