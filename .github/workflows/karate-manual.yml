@@ -46,15 +46,38 @@ jobs:
           to: ${{ github.event.inputs.correo }}
           from: ${{ secrets.MAIL_USERNAME }}
           subject: "🔵 Inicio de ejecución Karate – Tag: ${{ github.event.inputs.tag }}"
-          body: |
-            Hola,
+          html_body: |
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+              <h2 style="color: #1a73e8; margin-bottom: 10px;">🔵 Ejecución de Pruebas Karate – Iniciada</h2>
 
-            Se iniciará la ejecución de pruebas Karate.
-            • Tag: ${{ github.event.inputs.tag }}
-            • Ambiente: ${{ github.event.inputs.ambiente }}
-            • Fecha/Hora: $(date)
+              <p>Hola,</p>
 
-            Te notificaré nuevamente al finalizar las pruebas.
+              <p>Se ha iniciado la ejecución automática de pruebas <strong>Karate API</strong>.</p>
+
+              <table style="border-collapse: collapse; margin-top: 15px;">
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Tag seleccionado:</td>
+                  <td style="padding: 8px 12px;">${{ github.event.inputs.tag }}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Ambiente:</td>
+                  <td style="padding: 8px 12px;">${{ github.event.inputs.ambiente }}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Fecha/Hora:</td>
+                  <td style="padding: 8px 12px;">$(date)</td>
+                </tr>
+              </table>
+
+              <p style="margin-top: 20px;">
+                Recibirás una notificación al finalizar la ejecución.
+              </p>
+
+              <p style="margin-top: 25px; color: #555; font-size: 12px;">
+                Sistema Automático de QA · GitHub Actions
+              </p>
+            </div>
+
 
       - name: 📦 Instalar dependencias
         run: mvn clean install -DskipTests
@@ -154,7 +177,6 @@ jobs:
           path: karate-report-package
           retention-days: 14
 
-      # Notificar FIN — en el correo incrustamos la tabla generada y link al artifact
       - name: ✉️ Notificar FIN de ejecución (con tabla y link al artefacto)
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -167,11 +189,45 @@ jobs:
           from: ${{ secrets.MAIL_USERNAME }}
           subject: "🟢 Resultados Karate – Tag: ${{ github.event.inputs.tag }}"
           html_body: |
-            <h2>Resultados de pruebas Karate</h2>
-            <p><b>Tag:</b> ${{ github.event.inputs.tag }}</p>
-            <p><b>Ambiente:</b> ${{ github.event.inputs.ambiente }}</p>
-            <p><b>Estado:</b> <strong>${{ steps.karate.outputs.karate_failed == 'true' && 'FAILED ❌' || 'PASSED ✅' }}</strong></p>
-            <h3>Resumen de escenarios</h3>
-            ${{ steps.table.outputs.summary_table }}
-            <p><b>Fecha/Hora:</b> $(date)</p>
-            <p>El reporte detallado está disponible como artefacto en GitHub Actions (descarga el archivo único generado).</p>
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+              <h2 style="color: #34a853; margin-bottom: 10px;">🟢 Resultados de Pruebas Karate</h2>
+
+              <p>La ejecución de pruebas <strong>ha finalizado</strong>. Aquí tienes el resumen:</p>
+
+              <table style="border-collapse: collapse; margin-top: 15px;">
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Tag ejecutado:</td>
+                  <td style="padding: 8px 12px;">${{ github.event.inputs.tag }}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Ambiente:</td>
+                  <td style="padding: 8px 12px;">${{ github.event.inputs.ambiente }}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Estado general:</td>
+                  <td style="padding: 8px 12px;">
+                    <strong>
+                      ${{ steps.karate.outputs.karate_failed == 'true' && '❌ FAILED' || '✅ PASSED' }}
+                    </strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Fecha/Hora:</td>
+                  <td style="padding: 8px 12px;">$(date)</td>
+                </tr>
+              </table>
+
+              <h3 style="margin-top: 30px; color:#202124;">📊 Resumen de escenarios</h3>
+
+              <div style="margin-top: 10px;">
+                ${{ steps.table.outputs.summary_table }}
+              </div>
+
+              <p style="margin-top: 20px;">
+                Puedes descargar el reporte completo desde la sección de artefactos del pipeline en GitHub Actions.
+              </p>
+
+              <p style="margin-top: 25px; color: #555; font-size: 12px;">
+                Sistema Automático de QA · GitHub Actions
+              </p>
+            </div>
