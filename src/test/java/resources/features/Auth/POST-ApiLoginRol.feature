@@ -1,24 +1,15 @@
+@POST-ApiLoginRol
 Feature: Login de usuario directivo - Pruebas de Contrato API
 
 Background:
     * url urlBase
     * header Content-Type = "application/json"
 
-
-# 1. 🔵 Smoke Test
-@contract @smoke @post
-Scenario: Verificar que el endpoint acepta requests
+# 1. 🔵 Smoke
+@contract @smoke @post @test1
+Scenario: Validar que el servicio de login responde correctamente
     Given path "api/login/directivo"
-    And request { "Nombre_Usuario": "test", "Contraseña": "123" }
-    When method POST
-    Then status 400  # No importa si falla, lo importante es que responde
-
-
-# 2. 🟢 Happy Path (ya lo tienes, lo reestructuro)
-@contract @happy-path @post
-Scenario: Login exitoso con credenciales válidas
-    Given path "api/login/directivo"
-    And request
+    And request 
     """
     {
         "Nombre_Usuario": "director.asuncion8",
@@ -26,30 +17,69 @@ Scenario: Login exitoso con credenciales válidas
     }
     """
     When method POST
-    Then status 200
-    And match response == { token: "#string" }
+    Then status 200 
+
+# 2. 🔵 Happy Path
+@contract @happy-path @post @test2
+Scenario Outline: Validar que el servicio de login permite acceder por el <description>
+    Given path "api/login/" + route
+    And request 
+    """
+    {
+        "Nombre_Usuario": "<usuario>",
+        "Contraseña": "<contrasena>"
+    }
+    """
+    When method POST
+    Then status 200 
+    Examples: 
+        | route                      | usuario               | contrasena | description                                        |
+        | directivo                  | director.asuncion8    | 15430124   | rol de directivo                                   |
+        | profesor-primaria          | marisol_godoy_1537    | 15378317   | rol de profesor de primaria                        |
+        | auxiliar                   | brigida_gonzales_1535 | 15357278   | rol de auxiliar                                    |
+        | profesor-tutor-secundaria  | david_apolinario_1537 | 15371028   | rol de profesor-tutor secundaria (CASO NO TUTOR)   |
+        | profesor-tutor-secundaria  | daniel_sanchez_1542   | 15420745   | rol de personal tutor secundaria (CASO SI TUTOR)   |
+        | personal-administrativo    | jose_centeno_4180     | 41809910   | rol de personal personal administrativo            |
 
 
 # 3. 🧩 Schema Validation
-@contract @schema @post
-Scenario: Validar que el response cumple el esquema del contrato
-    Given path "api/login/directivo"
-    And request
+
+@contract @smoke @post @test3
+Scenario Outline: Validar que el servicio de login devuelve una respuesta correcta cuando se accede por el <description>
+    Given path "api/login/" + route
+    And request 
     """
     {
-        "Nombre_Usuario": "director.asuncion8",
-        "Contraseña": "15430124"
+        "Nombre_Usuario": "<usuario>",
+        "Contraseña": "<contrasena>"
     }
     """
     When method POST
-    Then status 200
+    Then status 200 
     And match response ==
     """
     {
-        token: "#string"
+    "success": "#boolean",
+    "message": "#string",
+    "data": {
+        "Apellidos": "#string",
+        "Nombres": "#string",
+        "Rol": "#string",
+        "token": "#string",
+        "Google_Drive_Foto_ID": "#string",
+        "Genero": "#string"
+    }
     }
     """
 
+    Examples: 
+        | route                      | usuario               | contrasena | description                                        |
+        | directivo                  | director.asuncion8    | 15430124   | rol de directivo                                   |
+        | profesor-primaria          | marisol_godoy_1537    | 15378317   | rol de profesor de primaria                        |
+        | auxiliar                   | brigida_gonzales_1535 | 15357278   | rol de auxiliar                                    |
+        | profesor-tutor-secundaria  | david_apolinario_1537 | 15371028   | rol de profesor-tutor secundaria (CASO NO TUTOR)   |
+        | profesor-tutor-secundaria  | daniel_sanchez_1542   | 15420745   | rol de personal tutor secundaria (CASO SI TUTOR)   |
+        | personal-administrativo    | jose_centeno_4180     | 41809910   | rol de personal personal administrativo            |
 
 # 4. 📋 Headers Validation
 @contract @headers @post
@@ -62,36 +92,44 @@ Scenario: Validar headers obligatorios y de respuesta
     And match responseHeaders['Content-Type'][0] contains "application/json"
 
 
-# 5. ❌ Error Handling
-@contract @error-handling @post
+
+# 5. ❌ Error Handling 🏷️ Field Validation
+@contract @error-handling @post @vaya
 Scenario Outline: Validar manejo de errores del endpoint
     Given path "api/login/directivo"
     And request <body>
     When method POST
-    Then status <expectedStatus>
-    And match response.message == "#string"
+    Then status 400
+    And match response.success == false
+    * match response.message == "El nombre de usuario y la contraseña son obligatorios"
+    * match response.errorType == "MISSING_PARAMETERS"
 
 Examples:
-    | body                                                        | expectedStatus |
-    | {}                                                          | 400 |
-    | { "Nombre_Usuario": "" , "Contraseña": "123" }              | 400 |
-    | { "Nombre_Usuario": "test" , "Contraseña": "" }             | 400 |
-    | { "Nombre_Usuario": "noExiste" , "Contraseña": "123" }      | 401 |
-    | { "Nombre_Usuario": "director.asuncion8", "Contraseña": "x"}| 401 |
+    | body                                                        |
+    | {}                                                          |
+    | { "Nombre_Usuario": "" , "Contraseña": "123" }              | 
+    | { "Nombre_Usuario": "test" , "Contraseña": "" }             | 
+    | { "Nombre_Usuario": "", "Contraseña": "" }                  |
 
 
-# 6. 🏷️ Field Validation
-@contract @fields @post
-Scenario: Validar campos obligatorios del request
+@contract @error-handling @post @vaya2
+Scenario Outline: Validar manejo de errores del endpoint
     Given path "api/login/directivo"
-    And request { "Nombre_Usuario": "", "Contraseña": "" }
+    And request <body>
     When method POST
-    Then status 400
-    And match response.message contains 'Nombre_Usuario'
-    And match response.message contains 'Contraseña'
+    Then status 401
+    And match response.success == false
+    * match response.message == "Credenciales inválidas"
+    * match response.errorType == "INVALID_CREDENTIALS"
+    
+    Examples: 
+        | body                                                        | 
+        | { "Nombre_Usuario": "noExiste" , "Contraseña": "123" }      | 
+        | { "Nombre_Usuario": "director.asuncion8", "Contraseña": "x"}| 
 
 
-# 7. 🔠 Data Types
+
+# 7. 🔠 Data Types  #ESTA BIEN QUE FALLE
 @contract @data-types @post
 Scenario Outline: Validar tipos de datos inválidos
     Given path "api/login/directivo"
