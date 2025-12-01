@@ -71,36 +71,6 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: 📦 Crear ZIP seguro del reporte Karate
-        run: |
-            mkdir karate-report-safe
-
-            # Copiar archivos principales
-            cp target/karate-reports/karate-summary.html karate-report-safe/
-            cp target/karate-reports/karate-summary-json.txt karate-report-safe/
-            cp target/karate-reports/karate-tags.html karate-report-safe/
-            cp target/karate-reports/karate-timeline.html karate-report-safe/
-            cp target/karate-reports/karate-logo.png karate-report-safe/
-            cp target/karate-reports/karate-logo.svg karate-report-safe/
-            cp target/karate-reports/karate-labs-logo-ring.svg karate-report-safe/
-            cp target/karate-reports/favicon.ico karate-report-safe/
-
-            # Copiar todos los HTML generados por cada feature
-            cp target/karate-reports/*.html karate-report-safe/ || true
-
-            # Copiar carpeta res donde están CSS / JS / imágenes
-            cp -r target/karate-reports/res karate-report-safe/
-
-            # Crear ZIP sin archivos peligrosos
-            zip -r karate-report.zip karate-report-safe/ \
-            -x "*.jar" \
-            -x "*.class" \
-            -x "*.exe" \
-            -x "*.sh" \
-            -x "*.bat" \
-            -x "*.cmd"
-
-
 
       # 7. Subir ZIP como artefacto
       - name: 📤 Subir reporte ZIP como artefacto
@@ -109,6 +79,31 @@ jobs:
           name: karate-report
           path: karate-report.zip
           retention-days: 14
+
+ # 👉 Convertir karate-summary-json.txt en una tabla HTML para Gmail
+      - name: Generate Email Summary Table
+        id: table
+        run: |
+          JSON_FILE="target/karate-reports/karate-summary-json.txt"
+
+          echo "<table border='1' cellspacing='0' cellpadding='6'>" > table.html
+          echo "<tr><th>Escenario</th><th>Estado</th></tr>" >> table.html
+
+          cat $JSON_FILE | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end)] | @tsv' | \
+          while IFS=$'\t' read -r name status; do
+            COLOR="red"
+            [[ "$status" == "PASSED" ]] && COLOR="green"
+
+            echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td></tr>" >> table.html
+          done
+
+          echo "</table>" >> table.html
+
+          SUMMARY_TABLE=$(cat table.html)
+          # Exportar para usar en el correo
+          echo "summary_table<<EOF" >> $GITHUB_OUTPUT
+          echo "$SUMMARY_TABLE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       # ---------- 9. Notificación final ----------
       - name: ✉️ Notificar FIN de ejecución + Adjuntar reporte
@@ -129,6 +124,8 @@ jobs:
             <p><b>Estado:</b> <strong>
               ${{ steps.karate.outputs.karate_failed == 'true' && 'FAILED ❌' || 'PASSED ✅' }}
             </strong></p>
+            <h3>Resumen de escenarios</h3>
+            ${{ steps.table.outputs.summary_table }}
             <p><b>Fecha/Hora:</b> $(date)</p>
-            <p>Se adjunta el reporte detallado de pruebas.</p>
-          attachments: karate-report.zip
+            <p>El reporte detallado está disponible como artefacto en GitHub Actions.</p>
+          
