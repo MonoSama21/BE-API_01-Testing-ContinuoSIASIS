@@ -63,44 +63,46 @@ jobs:
         id: karate
         run: |
           echo "karate_failed=false" >> $GITHUB_OUTPUT
-          mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} \
-            || echo "karate_failed=true" >> $GITHUB_OUTPUT
+          mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: 🔍 Detectar archivo de resumen Karate
+      # Detectar dinámicamente el JSON resumen (varía por versiones)
+      - name: 🔍 Detectar archivo de resumen Karate (busca primero)
         id: detect
         run: |
           FILE=$(find target -type f -name "karate-summary-json.txt" -o -name "karate-summary.json" | head -n 1)
           if [ -z "$FILE" ]; then
+            echo "⚠️ No se encontró karate-summary-json.txt ni karate-summary.json"
             echo "file_summary=" >> $GITHUB_OUTPUT
           else
+            echo "Resumen encontrado en: $FILE"
             echo "file_summary=$FILE" >> $GITHUB_OUTPUT
           fi
-
-      - name: 📝 Generar tabla HTML desde karate-summary-json
+          
+      - name: 📝 Generar tabla HTML de resultados (desde HTML Karate)
         id: table
         run: |
-          FILE="${{ steps.detect.outputs.file_summary }}"
+          REPORT_DIR="target/karate-reports"
 
-          if [ -z "$FILE" ]; then
-            echo "<p>No se encontró archivo karate-summary-json.</p>" > table.html
-          else
-            echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
-            echo "<tr style='background:#f2f2f2; font-weight:bold;'>
-                    <th>Escenario</th>
-                    <th>Estado</th>
-                  </tr>" >> table.html
+          echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
+          echo "<tr style='background:#f2f2f2; font-weight:bold;'><th>Escenario</th><th>Estado</th></tr>" >> table.html
 
-            jq -r '
-              .suite.features[].scenarios[] |
-              @base64
-            ' "$FILE" | while read row; do
-              _jq() { echo "$row" | base64 --decode | jq -r "$1"; }
+          # Buscar todos los HTML de Karate
+          for f in $(find "$REPORT_DIR" -type f -name "*.html"); do
 
-              NAME=$(_jq '.name')
-              STATUS=$(_jq '.status')
-              STATUS_UPPER=$(echo "$STATUS" | tr '[:lower:]' '[:upper:]')
+            # Extraer nombres de escenarios
+            sed -n 's/.*scenario-name">\(.*\)<\/.*/\1/p' "$f" > names.txt
 
+            # Extraer estado usando clase scenario-time passed / failed
+            sed -n 's/.*scenario-time \(passed\|failed\).*/\1/p' "$f" > status.txt
+
+            # Combinar ambas listas
+            paste names.txt status.txt | while IFS=$'\t' read -r name status; do
+
+              # PASSED o FAILED en mayúscula
+              STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
+
+              # Color visual
               if [ "$STATUS_UPPER" = "PASSED" ]; then
                 COLOR="green"
               else
@@ -108,38 +110,52 @@ jobs:
               fi
 
               echo "<tr>
-                      <td>$NAME</td>
+                      <td>$name</td>
                       <td style='color:$COLOR; font-weight:bold;'>$STATUS_UPPER</td>
                     </tr>" >> table.html
+
             done
 
-            echo "</table>" >> table.html
-          fi
+          done
+
+          rm -f names.txt status.txt || true
+
+          echo "</table>" >> table.html
 
           SUMMARY=$(cat table.html)
           echo "summary_table<<EOF" >> $GITHUB_OUTPUT
           echo "$SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: 📁 Empaquetar reporte limpio
+
+
+      # Crear una carpeta con SOLO los archivos del reporte (para evitar nested-zip)
+      - name: 📁 Empaquetar únicamente los archivos del reporte (sin .jar/.class/etc)
         run: |
           rm -rf karate-report-package || true
           mkdir karate-report-package
-
+          # Si existe, copiar toda la carpeta karate-reports (estilos, html, imgs)
           if [ -d "target/karate-reports" ]; then
-            cp -r target/karate-reports/* karate-report-package/
+            cp -r target/karate-reports/* karate-report-package/ || true
+          else
+            echo "⚠️ No existe target/karate-reports; nada para empaquetar"
           fi
+          # opcional: eliminar archivos potencialmente bloqueados por Gmail dentro de la carpeta
+          find karate-report-package -type f \( -iname "*.jar" -o -iname "*.class" -o -iname "*.sh" -o -iname "*.exe" -o -iname "*.bat" -o -iname "*.cmd" \) -delete || true
+          # verifica contenido
+          echo "Contenido de karate-report-package:"
+          ls -R karate-report-package || true
 
-          find karate-report-package -type f \( -iname "*.jar" -o -iname "*.class" -o -iname "*.exe" -o -iname "*.bat" -o -iname "*.cmd" \) -delete || true
-
-      - name: 📤 Subir reporte como artefacto ZIP único
+      # SUBIR la carpeta como ARTIFACT (esto generará UN solo ZIP cuyo contenido son los archivos del reporte)
+      - name: 📤 Subir carpeta del reporte como artefacto (genera 1 ZIP en GitHub)
         uses: actions/upload-artifact@v4
         with:
           name: karate-report
           path: karate-report-package
           retention-days: 14
 
-      - name: ✉️ Notificar FIN de ejecución (con tabla y link)
+      # Notificar FIN — en el correo incrustamos la tabla generada y link al artifact
+      - name: ✉️ Notificar FIN de ejecución (con tabla y link al artefacto)
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -155,9 +171,7 @@ jobs:
             <p><b>Tag:</b> ${{ github.event.inputs.tag }}</p>
             <p><b>Ambiente:</b> ${{ github.event.inputs.ambiente }}</p>
             <p><b>Estado:</b> <strong>${{ steps.karate.outputs.karate_failed == 'true' && 'FAILED ❌' || 'PASSED ✅' }}</strong></p>
-
             <h3>Resumen de escenarios</h3>
             ${{ steps.table.outputs.summary_table }}
-
             <p><b>Fecha/Hora:</b> $(date)</p>
-            <p>El reporte detallado está disponible como artefacto en GitHub Actions.</p>
+            <p>El reporte detallado está disponible como artefacto en GitHub Actions (descarga el archivo único generado).</p>
