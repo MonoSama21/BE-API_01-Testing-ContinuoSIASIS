@@ -72,9 +72,10 @@ jobs:
         continue-on-error: true
 
       # 6. Crear ZIP único de TODOS los reportes
-      - name: 📦 Comprimir reportes en ZIP
+      - name: 📦 Comprimir SOLO reportes en ZIP
         run: |
-          zip -r karate-report.zip target/
+            zip -r karate-report.zip target/karate-reports/
+
 
       # 7. Subir ZIP como artefacto
       - name: 📤 Subir reporte ZIP como artefacto
