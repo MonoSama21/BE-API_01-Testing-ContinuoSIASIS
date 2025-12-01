@@ -66,8 +66,7 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      # Detectar dinámicamente el JSON resumen (varía por versiones)
-      - name: 🔍 Detectar archivo de resumen Karate (busca primero)
+      - name: 🔍 Detectar archivo de resumen Karate
         id: detect
         run: |
           FILE=$(find target -type f -name "karate-summary-json.txt" -o -name "karate-summary.json" | head -n 1)
@@ -78,7 +77,7 @@ jobs:
             echo "Resumen encontrado en: $FILE"
             echo "file_summary=$FILE" >> $GITHUB_OUTPUT
           fi
-          
+
       - name: 📝 Generar tabla HTML de resultados (desde HTML Karate)
         id: table
         run: |
@@ -87,17 +86,17 @@ jobs:
           echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
           echo "<tr style='background:#f2f2f2;'><th>Escenario</th><th>Estado</th></tr>" >> table.html
 
-          # Buscar archivos HTML del reporte
           for f in $(find "$REPORT_DIR" -type f -name "*.html"); do
 
-            # Extraer nombres de escenarios (sed en vez de grep -P)
+            # Extrae nombres de escenarios
             sed -n 's/.*scenario-name">\(.*\)<\/.*/\1/p' "$f" > names.txt
 
-            # Estado del escenario (passed / failed)
-            grep -oP '(?<=class="status ).*?(?=")' "$f" > status.txt
+            # Extrae estado correcto (class="status passed" o "status failed")
+            sed -n 's/.*class="status \([^"]*\)".*/\1/p' "$f" > status.txt
 
             paste names.txt status.txt | while IFS=$'\t' read -r name status; do
               STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
+
               COLOR="red"
               [[ "$STATUS_UPPER" == "PASSED" ]] && COLOR="green"
 
@@ -114,34 +113,28 @@ jobs:
           echo "$SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-
-      # Crear una carpeta con SOLO los archivos del reporte (para evitar nested-zip)
-      - name: 📁 Empaquetar únicamente los archivos del reporte (sin .jar/.class/etc)
+      - name: 📁 Empaquetar reporte limpio
         run: |
           rm -rf karate-report-package || true
           mkdir karate-report-package
-          # Si existe, copiar toda la carpeta karate-reports (estilos, html, imgs)
-          if [ -d "target/karate-reports" ]; then
-            cp -r target/karate-reports/* karate-report-package/ || true
-          else
-            echo "⚠️ No existe target/karate-reports; nada para empaquetar"
-          fi
-          # opcional: eliminar archivos potencialmente bloqueados por Gmail dentro de la carpeta
-          find karate-report-package -type f \( -iname "*.jar" -o -iname "*.class" -o -iname "*.sh" -o -iname "*.exe" -o -iname "*.bat" -o -iname "*.cmd" \) -delete || true
-          # verifica contenido
-          echo "Contenido de karate-report-package:"
-          ls -R karate-report-package || true
 
-      # SUBIR la carpeta como ARTIFACT (esto generará UN solo ZIP cuyo contenido son los archivos del reporte)
-      - name: 📤 Subir carpeta del reporte como artefacto (genera 1 ZIP en GitHub)
+          if [ -d "target/karate-reports" ]; then
+            cp -r target/karate-reports/* karate-report-package/
+          fi
+
+          find karate-report-package -type f \( -iname "*.jar" -o -iname "*.class" -o -iname "*.exe" -o -iname "*.bat" -o -iname "*.cmd" \) -delete || true
+
+          echo "Contenido final:"
+          ls -R karate-report-package
+
+      - name: 📤 Subir reporte como artefacto ZIP único
         uses: actions/upload-artifact@v4
         with:
           name: karate-report
           path: karate-report-package
           retention-days: 14
 
-      # Notificar FIN — en el correo incrustamos la tabla generada y link al artifact
-      - name: ✉️ Notificar FIN de ejecución (con tabla y link al artefacto)
+      - name: ✉️ Notificar FIN de ejecución (con tabla y link)
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -160,4 +153,4 @@ jobs:
             <h3>Resumen de escenarios</h3>
             ${{ steps.table.outputs.summary_table }}
             <p><b>Fecha/Hora:</b> $(date)</p>
-            <p>El reporte detallado está disponible como artefacto en GitHub Actions (descarga el archivo único generado).</p>
+            <p>El reporte detallado está disponible como artefacto en GitHub Actions.</p>
