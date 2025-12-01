@@ -1,0 +1,55 @@
+name: 🚀 Karate API Tests - Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag de pruebas a ejecutar (ej: @login, @security)"
+        required: true
+        type: string
+      ambiente:
+        description: "Ambiente a ejecutar (DEV o QA)"
+        required: true
+        type: choice
+        options:
+          - DEV
+          - QA
+        default: QA
+
+jobs:
+  run-karate-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+
+      # 1. Descargar código
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      # 2. Instalar JDK
+      - name: ☕ Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. Instalar dependencias Maven
+      - name: 📦 Instalar dependencias
+        run: mvn clean install -DskipTests
+
+      # 4. Ejecutar Karate por TAG
+      - name: 🧪 Ejecutar pruebas Karate con tag
+        run: mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }}
+
+      # 5. Listar reportes generados
+      - name: 📄 Listar reportes
+        run: ls -R target
+
+      # 6. Guardar reportes como artefacto
+      - name: 📤 Subir reportes de Karate
+        uses: actions/upload-artifact@v4
+        with:
+          name: karate-report
+          path: target/
+          retention-days: 14
