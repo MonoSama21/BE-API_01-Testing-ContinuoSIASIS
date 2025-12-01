@@ -71,8 +71,58 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
+      # ---------- 6. Detectar archivo JSON de resumen ----------
+      - name: 🔍 Detectar archivo de resumen Karate
+        id: detect
+        run: |
+          FILE=$(find target -name "karate-summary-json.txt" | head -n 1)
+          if [ -z "$FILE" ]; then
+            echo "⚠️ No se encontró karate-summary-json.txt"
+            echo "file_summary=" >> $GITHUB_OUTPUT
+          else
+            echo "Resumen encontrado en: $FILE"
+            echo "file_summary=$FILE" >> $GITHUB_OUTPUT
+          fi
 
-      # 7. Subir ZIP como artefacto
+      # ---------- 7. Crear Tabla HTML ----------
+      - name: 📝 Generar tabla HTML de resultados
+        id: table
+        run: |
+          FILE="${{ steps.detect.outputs.file_summary }}"
+
+          # Si no existe el archivo JSON → tabla vacía
+          if [ -z "$FILE" ]; then
+            echo "<p>No se encontró karate-summary-json.txt. No hay escenarios para mostrar.</p>" > table.html
+          else
+            echo "<table border='1' cellspacing='0' cellpadding='6'>" > table.html
+            echo "<tr><th>Escenario</th><th>Estado</th></tr>" >> table.html
+
+            cat "$FILE" | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end)] | @tsv' | \
+            while IFS=$'\t' read -r name status; do
+              COLOR="red"
+              [[ "$status" == "PASSED" ]] && COLOR="green"
+              echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td></tr>" >> table.html
+            done
+
+            echo "</table>" >> table.html
+          fi
+
+          SUMMARY=$(cat table.html)
+          echo "summary_table<<EOF" >> $GITHUB_OUTPUT
+          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # ---------- 8. Crear ZIP del reporte ----------
+      - name: 📁 Crear ZIP del reporte Karate
+        run: |
+          if [ -d "target/karate-reports" ]; then
+            cd target/karate-reports
+            zip -r ../../karate-report.zip .
+          else
+            echo "⚠️ No existe la carpeta target/karate-reports"
+          fi
+
+      # ---------- 9. Subir artefacto ZIP ----------
       - name: 📤 Subir reporte ZIP como artefacto
         uses: actions/upload-artifact@v4
         with:
@@ -80,33 +130,8 @@ jobs:
           path: karate-report.zip
           retention-days: 14
 
- # 👉 Convertir karate-summary-json.txt en una tabla HTML para Gmail
-      - name: Generate Email Summary Table
-        id: table
-        run: |
-          JSON_FILE="target/karate-reports/karate-summary-json.txt"
-
-          echo "<table border='1' cellspacing='0' cellpadding='6'>" > table.html
-          echo "<tr><th>Escenario</th><th>Estado</th></tr>" >> table.html
-
-          cat $JSON_FILE | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end)] | @tsv' | \
-          while IFS=$'\t' read -r name status; do
-            COLOR="red"
-            [[ "$status" == "PASSED" ]] && COLOR="green"
-
-            echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td></tr>" >> table.html
-          done
-
-          echo "</table>" >> table.html
-
-          SUMMARY_TABLE=$(cat table.html)
-          # Exportar para usar en el correo
-          echo "summary_table<<EOF" >> $GITHUB_OUTPUT
-          echo "$SUMMARY_TABLE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      # ---------- 9. Notificación final ----------
-      - name: ✉️ Notificar FIN de ejecución + Adjuntar reporte
+      # ---------- 10. Notificación final ----------
+      - name: ✉️ Notificar FIN de ejecución (sin adjuntos)
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -128,4 +153,3 @@ jobs:
             ${{ steps.table.outputs.summary_table }}
             <p><b>Fecha/Hora:</b> $(date)</p>
             <p>El reporte detallado está disponible como artefacto en GitHub Actions.</p>
-          
