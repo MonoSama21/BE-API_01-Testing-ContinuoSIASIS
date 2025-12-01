@@ -16,7 +16,7 @@ on:
           - QA
         default: QA
       correo:
-        description: "Correo donde se enviará la notificación"
+        description: "Correo donde llegarán las notificaciones"
         required: true
         type: string
 
@@ -27,17 +27,28 @@ jobs:
 
     steps:
 
-      # ---------- 0. Notificación antes ----------
-      - name: ✉️ Enviar notificación ANTES de ejecutar pruebas
+      # ---------- 1. Checkout ----------
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      # ---------- 2. JDK ----------
+      - name: ☕ Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # ---------- 3. Notificación antes ----------
+      - name: ✉️ Notificar INICIO de ejecución
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "⚠️ Inicio de ejecución Karate – Tag: ${{ github.event.inputs.tag }}"
           to: ${{ github.event.inputs.correo }}
-          from: "GitHub Actions <${{ secrets.MAIL_FROM }}>"
+          from: ${{ secrets.MAIL_USERNAME }}
+          subject: "🔵 Inicio de ejecución Karate – Tag: ${{ github.event.inputs.tag }}"
           body: |
             Hola,
 
@@ -46,41 +57,46 @@ jobs:
             • Ambiente: ${{ github.event.inputs.ambiente }}
             • Fecha/Hora: $(date)
 
-            Te avisaré nuevamente cuando finalicen las pruebas.
+            Te notificaré nuevamente al finalizar las pruebas.
 
-      # 1. Descargar código
-      - name: 📥 Checkout del repositorio
-        uses: actions/checkout@v4
-
-      # 2. Instalar JDK
-      - name: ☕ Configurar JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      # 3. Instalar dependencias Maven
+      # ---------- 4. Instalar dependencias ----------
       - name: 📦 Instalar dependencias
         run: mvn clean install -DskipTests
 
-      # 4. Ejecutar Karate por TAG
+      # ---------- 5. Ejecutar pruebas ----------
       - name: 🧪 Ejecutar pruebas Karate con tag
-        run: mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }}
+        id: karate
+        run: |
+          echo "karate_failed=false" >> $GITHUB_OUTPUT
+          mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
 
-      # 5. Listar reportes generados
+      # ---------- 6. Listar reportes ----------
       - name: 📄 Listar reportes
-        run: ls -R target
+        if: always()
+        run: ls -R target || echo "No existe carpeta target"
 
-      # 6. Guardar reportes como artefacto
+      # ---------- 7. Subir artefactos ----------
       - name: 📤 Subir reportes de Karate
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: karate-report
           path: target/
           retention-days: 14
 
-      # ---------- 7. Notificación después ----------
-      - name: ✉️ Enviar notificación DESPUÉS de ejecutar pruebas
+      # ---------- 8. Crear reporte si no existe ----------
+      - name: 🛠 Crear reporte si no existe
+        if: always()
+        run: |
+          mkdir -p target/karate-reports
+          if [ ! -f target/karate-reports/karate-summary.html ]; then
+            echo "<h1>No se generó el reporte porque hubo fallas en la ejecución</h1>" > target/karate-reports/karate-summary.html
+          fi
+
+      # ---------- 9. Notificación final ----------
+      - name: ✉️ Notificar FIN de ejecución + Adjuntar reporte
+        if: always()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
@@ -88,21 +104,18 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           to: ${{ github.event.inputs.correo }}
-          from: "GitHub Actions <${{ secrets.MAIL_FROM }}>"
-          subject: "✅ Pruebas Karate finalizadas – Tag: ${{ github.event.inputs.tag }}"
-          body: |
-            Hola,
-
-            Las pruebas Karate han finalizado.
-
-            • Tag ejecutado: ${{ github.event.inputs.tag }}
-            • Ambiente: ${{ github.event.inputs.ambiente }}
-            • Estado: Completado
-            • Fecha/Hora: $(date)
-
-            Se adjunta el reporte generado.
-
+          from: ${{ secrets.MAIL_USERNAME }}
+          subject: "🟢 Resultados Karate – Tag: ${{ github.event.inputs.tag }}"
+          html_body: |
+            <h2>Resultados de pruebas Karate</h2>
+            <p><b>Tag:</b> ${{ github.event.inputs.tag }}</p>
+            <p><b>Ambiente:</b> ${{ github.event.inputs.ambiente }}</p>
+            <p><b>Estado:</b> <strong>
+              ${{ steps.karate.outputs.karate_failed == 'true' && 'FAILED ❌' || 'PASSED ✅' }}
+            </strong></p>
+            <p><b>Fecha/Hora:</b> $(date)</p>
+            <p>Se adjunta el reporte detallado de pruebas.</p>
           attachments: |
             target/karate-reports/karate-summary.html
-            target/surefire-reports/*.txt
             target/karate-reports/*.html
+            target/surefire-reports/
