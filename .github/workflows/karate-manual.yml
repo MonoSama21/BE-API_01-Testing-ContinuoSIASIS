@@ -31,13 +31,13 @@ jobs:
       - name: ✉️ Enviar notificación ANTES de ejecutar pruebas
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
           subject: "⚠️ Inicio de ejecución Karate – Tag: ${{ github.event.inputs.tag }}"
           to: ${{ github.event.inputs.correo }}
-          from: "GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
+          from: "GitHub Actions <${{ secrets.MAIL_FROM }}>"
           body: |
             Hola,
 
@@ -83,12 +83,12 @@ jobs:
       - name: ✉️ Enviar notificación DESPUÉS de ejecutar pruebas
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
           to: ${{ github.event.inputs.correo }}
-          from: "GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
+          from: "GitHub Actions <${{ secrets.MAIL_FROM }}>"
           subject: "✅ Pruebas Karate finalizadas – Tag: ${{ github.event.inputs.tag }}"
           body: |
             Hola,
