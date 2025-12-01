@@ -71,10 +71,26 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      # 6. Crear ZIP único de TODOS los reportes
-      - name: 📦 Comprimir SOLO reportes en ZIP
+      - name: 📦 Comprimir reportes sin archivos bloqueados por Gmail
         run: |
-            zip -r karate-report.zip target/karate-reports/
+            mkdir safe-report
+            cp target/karate-reports/karate-summary.html safe-report/
+
+            # copiar solo las carpetas necesarias
+            if [ -d "target/karate-reports/karate-summary" ]; then
+            cp -r target/karate-reports/karate-summary safe-report/
+            fi
+
+            # Crear ZIP sin archivos ejecutables
+            zip -r karate-report.zip safe-report/ \
+            -x "*.jar" \
+            -x "*.class" \
+            -x "*.exe" \
+            -x "*.sh" \
+            -x "*.bat" \
+            -x "*.cmd" \
+            -x "*.json" \
+            -x "*.js"
 
 
       # 7. Subir ZIP como artefacto
