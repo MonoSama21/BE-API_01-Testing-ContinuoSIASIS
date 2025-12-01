@@ -78,8 +78,8 @@ jobs:
             echo "Resumen encontrado en: $FILE"
             echo "file_summary=$FILE" >> $GITHUB_OUTPUT
           fi
-
-      - name: 📝 Generar tabla HTML de resultados (desde archivos HTML)
+          
+      - name: 📝 Generar tabla HTML de resultados (desde HTML Karate)
         id: table
         run: |
           REPORT_DIR="target/karate-reports"
@@ -87,13 +87,19 @@ jobs:
           echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
           echo "<tr style='background:#f2f2f2;'><th>Escenario</th><th>Estado</th></tr>" >> table.html
 
-          # Buscar escenarios dentro de los HTML
-          for f in $(find $REPORT_DIR -name "*.html"); do
-            grep -oP '(?<=scenario-name">).*?(?=</)' "$f" > names.txt
-            grep -oP '(?<=scenario-status ).*?(?=")' "$f" > status.txt
+          # Buscar archivos HTML del reporte
+          for f in $(find "$REPORT_DIR" -type f -name "*.html"); do
 
+            # Extraer nombres de escenarios (sed en vez de grep -P)
+            sed -n 's/.*scenario-name">\(.*\)<\/.*/\1/p' "$f" > names.txt
+
+            # Extraer estados (passed / failed)
+            sed -n 's/.*scenario-status \([^"]*\)".*/\1/p' "$f" > status.txt
+
+            # Combinar ambos
             paste names.txt status.txt | while IFS=$'\t' read -r name status; do
               STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
+
               COLOR="red"
               [[ "$STATUS_UPPER" == "PASSED" ]] && COLOR="green"
 
@@ -102,6 +108,7 @@ jobs:
           done
 
           rm -f names.txt status.txt || true
+
           echo "</table>" >> table.html
 
           SUMMARY=$(cat table.html)
