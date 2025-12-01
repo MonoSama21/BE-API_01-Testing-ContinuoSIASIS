@@ -27,18 +27,15 @@ jobs:
 
     steps:
 
-      # ---------- 1. Checkout ----------
       - name: 📥 Checkout del repositorio
         uses: actions/checkout@v4
 
-      # ---------- 2. JDK ----------
       - name: ☕ Configurar JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
 
-      # ---------- 3. Notificación antes ----------
       - name: ✉️ Notificar INICIO de ejecución
         uses: dawidd6/action-send-mail@v3
         with:
@@ -59,11 +56,9 @@ jobs:
 
             Te notificaré nuevamente al finalizar las pruebas.
 
-      # ---------- 4. Instalar dependencias ----------
       - name: 📦 Instalar dependencias
         run: mvn clean install -DskipTests
 
-      # ---------- 5. Ejecutar pruebas ----------
       - name: 🧪 Ejecutar pruebas Karate con tag
         id: karate
         run: |
@@ -71,65 +66,77 @@ jobs:
           mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-# ---------- 6. Detectar archivo JSON de resumen ----------
-      - name: 🔍 Detectar archivo de resumen Karate
+      # Detectar dinámicamente el JSON resumen (varía por versiones)
+      - name: 🔍 Detectar archivo de resumen Karate (busca primero)
         id: detect
         run: |
-          FILE=$(find target -name "karate-summary-json.txt" | head -n 1)
+          FILE=$(find target -type f -name "karate-summary-json.txt" -o -name "karate-summary.json" | head -n 1)
           if [ -z "$FILE" ]; then
-            echo "⚠️ No se encontró karate-summary-json.txt"
+            echo "⚠️ No se encontró karate-summary-json.txt ni karate-summary.json"
             echo "file_summary=" >> $GITHUB_OUTPUT
           else
             echo "Resumen encontrado en: $FILE"
             echo "file_summary=$FILE" >> $GITHUB_OUTPUT
           fi
 
-  
-    # 👉 Convertir karate-summary-json.txt en una tabla HTML para Gmail
-      - name: Generate Email Summary Table
+      # Generar la tabla HTML usando lo encontrado (si hay)
+      - name: 📝 Generar tabla HTML de resultados
         id: table
         run: |
-          JSON_FILE="target/karate-reports/karate-summary-json.txt"
+          FILE="${{ steps.detect.outputs.file_summary }}"
 
-          echo "<table border='1' cellspacing='0' cellpadding='6'>" > table.html
-          echo "<tr><th>Escenario</th><th>Estado</th></tr>" >> table.html
-
-          cat $JSON_FILE | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end)] | @tsv' | \
-          while IFS=$'\t' read -r name status; do
-            COLOR="red"
-            [[ "$status" == "PASSED" ]] && COLOR="green"
-
-            echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td></tr>" >> table.html
-          done
-
-          echo "</table>" >> table.html
-
-          SUMMARY_TABLE=$(cat table.html)
-          # Exportar para usar en el correo
-          echo "summary_table<<EOF" >> $GITHUB_OUTPUT
-          echo "$SUMMARY_TABLE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      # ---------- 8. Crear ZIP del reporte ----------
-      - name: 📁 Crear ZIP del reporte Karate
-        run: |
-          if [ -d "target/karate-reports" ]; then
-            cd target/karate-reports
-            zip -r ../../karate-report.zip .
+          if [ -z "$FILE" ]; then
+            echo "<p>No se encontró archivo de resumen. No hay escenarios para mostrar.</p>" > table.html
           else
-            echo "⚠️ No existe la carpeta target/karate-reports"
+            echo "<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse;'>" > table.html
+            echo "<tr style='background:#f2f2f2;'><th>Escenario</th><th>Estado</th></tr>" >> table.html
+
+            cat "$FILE" | jq -r '.scenarios[] | [.name, (if .passed then "PASSED" else "FAILED" end), (.duration // "")] | @tsv' | \
+            while IFS=$'\t' read -r name status duration; do
+              COLOR="red"
+              [[ "$status" == "PASSED" ]] && COLOR="green"
+              DURATION_CELL=""
+              if [ -n "$duration" ]; then
+                DURATION_CELL="<td>$duration ms</td>"
+              fi
+              echo "<tr><td>$name</td><td style='color:$COLOR;font-weight:bold;'>$status</td>$DURATION_CELL</tr>" >> table.html
+            done
+
+            echo "</table>" >> table.html
           fi
 
-      # 7. Subir ZIP como artefacto
-      - name: 📤 Subir reporte ZIP como artefacto
+          SUMMARY=$(cat table.html)
+          echo "summary_table<<EOF" >> $GITHUB_OUTPUT
+          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # Crear una carpeta con SOLO los archivos del reporte (para evitar nested-zip)
+      - name: 📁 Empaquetar únicamente los archivos del reporte (sin .jar/.class/etc)
+        run: |
+          rm -rf karate-report-package || true
+          mkdir karate-report-package
+          # Si existe, copiar toda la carpeta karate-reports (estilos, html, imgs)
+          if [ -d "target/karate-reports" ]; then
+            cp -r target/karate-reports/* karate-report-package/ || true
+          else
+            echo "⚠️ No existe target/karate-reports; nada para empaquetar"
+          fi
+          # opcional: eliminar archivos potencialmente bloqueados por Gmail dentro de la carpeta
+          find karate-report-package -type f \( -iname "*.jar" -o -iname "*.class" -o -iname "*.sh" -o -iname "*.exe" -o -iname "*.bat" -o -iname "*.cmd" \) -delete || true
+          # verifica contenido
+          echo "Contenido de karate-report-package:"
+          ls -R karate-report-package || true
+
+      # SUBIR la carpeta como ARTIFACT (esto generará UN solo ZIP cuyo contenido son los archivos del reporte)
+      - name: 📤 Subir carpeta del reporte como artefacto (genera 1 ZIP en GitHub)
         uses: actions/upload-artifact@v4
         with:
           name: karate-report
-          path: karate-report.zip
+          path: karate-report-package
           retention-days: 14
 
-# ---------- 10. Notificación final ----------
-      - name: ✉️ Notificar FIN de ejecución (sin adjuntos)
+      # Notificar FIN — en el correo incrustamos la tabla generada y link al artifact
+      - name: ✉️ Notificar FIN de ejecución (con tabla y link al artefacto)
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -144,10 +151,8 @@ jobs:
             <h2>Resultados de pruebas Karate</h2>
             <p><b>Tag:</b> ${{ github.event.inputs.tag }}</p>
             <p><b>Ambiente:</b> ${{ github.event.inputs.ambiente }}</p>
-            <p><b>Estado:</b> <strong>
-              ${{ steps.karate.outputs.karate_failed == 'true' && 'FAILED ❌' || 'PASSED ✅' }}
-            </strong></p>
+            <p><b>Estado:</b> <strong>${{ steps.karate.outputs.karate_failed == 'true' && 'FAILED ❌' || 'PASSED ✅' }}</strong></p>
             <h3>Resumen de escenarios</h3>
             ${{ steps.table.outputs.summary_table }}
             <p><b>Fecha/Hora:</b> $(date)</p>
-            <p>El reporte detallado está disponible como artefacto en GitHub Actions.</p>
+            <p>El reporte detallado está disponible como artefacto en GitHub Actions (descarga el archivo único generado).</p>
