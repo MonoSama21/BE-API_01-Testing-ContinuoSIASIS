@@ -72,14 +72,14 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-
-
-
+      - name: 🕐 Capturar fecha de inicio
+        id: fecha_inicio
+        run: |
+          echo "datetime=$(TZ=America/Lima date '+%d/%m/%Y %H:%M:%S %Z')" >> $GITHUB_OUTPUT
+          echo "year=$(TZ=America/Lima date '+%Y')" >> $GITHUB_OUTPUT
 
       - name: ✉️ Notificar INICIO de ejecución
         uses: dawidd6/action-send-mail@v3
-        env:
-          TZ: America/Lima
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
@@ -134,7 +134,7 @@ jobs:
                                   </tr>
                                   <tr>
                                     <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">📅 Fecha/Hora:</td>
-                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">$(TZ=America/Lima date '+%d/%m/%Y %H:%M:%S %Z')</td>
+                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">${{ steps.fecha_inicio.outputs.datetime }}</td>
                                   </tr>
                                   <tr>
                                     <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">🔢 Ejecución #:</td>
@@ -163,7 +163,7 @@ jobs:
                       <tr>
                         <td style="background-color: #f8f9fa; padding: 20px 30px; border-top: 1px solid #e0e0e0;">
                           <p style="color: #999999; font-size: 12px; margin: 0; text-align: center;">
-                            GitHub Actions · Testing Continuo · $(TZ=America/Lima date '+%Y')
+                            GitHub Actions · Testing Continuo · ${{ steps.fecha_inicio.outputs.year }}
                           </p>
                         </td>
                       </tr>
@@ -743,13 +743,16 @@ jobs:
           publish_dir: ./gh-pages-temp
           keep_files: true
 
-        
+      - name: 🕐 Capturar fecha de fin
+        id: fecha_fin
+        if: always()
+        run: |
+          echo "datetime=$(TZ=America/Lima date '+%d/%m/%Y %H:%M:%S %Z')" >> $GITHUB_OUTPUT
+          echo "year=$(TZ=America/Lima date '+%Y')" >> $GITHUB_OUTPUT
 
       - name: ✉️ Notificar FIN de ejecución (con tabla y link al artefacto)
         if: always()
         uses: dawidd6/action-send-mail@v3
-        env:
-          TZ: America/Lima
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
@@ -811,7 +814,7 @@ jobs:
                                   </tr>
                                   <tr>
                                     <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">📅 Fecha/Hora:</td>
-                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">$(TZ=America/Lima date '+%d/%m/%Y %H:%M:%S %Z')</td>
+                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">${{ steps.fecha_fin.outputs.datetime }}</td>
                                   </tr>
                                   <tr>
                                     <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">🔢 Ejecución #:</td>
@@ -859,7 +862,7 @@ jobs:
                       <tr>
                         <td style="background-color: #f8f9fa; padding: 20px 30px; border-top: 1px solid #e0e0e0;">
                           <p style="color: #999999; font-size: 12px; margin: 0; text-align: center;">
-                            GitHub Actions · Testing Continuo · $(TZ=America/Lima date '+%Y')
+                            GitHub Actions · Testing Continuo · ${{ steps.fecha_fin.outputs.year }}
                           </p>
                           <p style="color: #999999; font-size: 11px; margin: 10px 0 0 0; text-align: center;">
                             <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" style="color: #1a73e8; text-decoration: none;">Ver Historial de Reportes</a>
