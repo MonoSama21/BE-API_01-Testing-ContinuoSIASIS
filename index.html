@@ -7,6 +7,13 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
     h1 { color: #1a73e8; }
+    .stats { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 5px; 
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     .report-list { list-style: none; padding: 0; }
     .report-item { 
       background: white; 
@@ -23,17 +30,56 @@
     }
     .report-link:hover { text-decoration: underline; }
     .report-date { color: #666; font-size: 14px; margin-top: 5px; }
+    .badge { 
+      display: inline-block; 
+      padding: 3px 8px; 
+      border-radius: 3px; 
+      font-size: 12px; 
+      margin-left: 10px;
+    }
+    .badge-new { background: #34a853; color: white; }
   </style>
 </head>
 <body>
   <h1>📊 Historial de Reportes Karate</h1>
-  <p>Último reporte generado: <strong>Run #30</strong></p>
+  <div class="stats">
+    <p><strong>Último reporte generado:</strong> Run #31</p>
+    <p><strong>Tag:</strong> @postLoginRolDirectivo</p>
+    <p><strong>Ambiente:</strong> QA</p>
+    <p><strong>Fecha:</strong> 2025-12-22 18:49:18</p>
+  </div>
+  <h2>📋 Historial de Ejecuciones</h2>
   <ul class="report-list">
     <li class="report-item">
-      <a class="report-link" href="reports/30/karate-summary.html">
-        📄 Reporte #30 - Tag: @postLoginRolDirectivo
+      <a class="report-link" href="reports/31/karate-summary.html">
+        📄 Reporte #31 - Tag: @postLoginRolDirectivo
       </a>
-      <div class="report-date">Ambiente: QA | Fecha: $(date '+%Y-%m-%d %H:%M:%S')</div>
+      <span class="badge badge-new">NUEVO</span>
+      <div class="report-date">Ambiente: QA | Fecha: 2025-12-22 18:49:18</div>
+    </li>
+    <li class="report-item">
+      <a class="report-link" href="reports/30/karate-summary.html">
+        📄 Reporte #30
+      </a>
+      <div class="report-date">Reporte histórico</div>
+    </li>
+    <li class="report-item">
+      <a class="report-link" href="reports/29/karate-summary.html">
+        📄 Reporte #29
+      </a>
+      <div class="report-date">Reporte histórico</div>
+    </li>
+    <li class="report-item">
+      <a class="report-link" href="reports/28/karate-summary.html">
+        📄 Reporte #28
+      </a>
+      <div class="report-date">Reporte histórico</div>
+    </li>
+    <li class="report-item">
+      <a class="report-link" href="reports/27/karate-summary.html">
+        📄 Reporte #27
+      </a>
+      <div class="report-date">Reporte histórico</div>
     </li>
   </ul>
 </body>
