@@ -154,6 +154,51 @@ jobs:
           echo "$SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: 📊 Publicar resultados en GitHub Summary
+        if: always()
+        run: |
+          echo "# 📊 Resultados de Pruebas Karate" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Información de Ejecución" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parámetro | Valor |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏷️ Tag ejecutado | \`${{ github.event.inputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌍 Ambiente | \`${{ github.event.inputs.ambiente }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📅 Fecha/Hora | $(date '+%Y-%m-%d %H:%M:%S') |" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Estado | ${{ steps.karate.outputs.karate_failed == 'true' && '❌ FAILED' || '✅ PASSED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 Resultados por Escenario" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Generar tabla en formato Markdown para GitHub
+          echo "| Escenario | Estado |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          REPORT_DIR="target/karate-reports"
+          for f in $(find "$REPORT_DIR" -type f -name "*.html" 2>/dev/null); do
+            sed -n 's/.*scenario-name">\(.*\)<\/.*/\1/p' "$f" > names_summary.txt
+            sed -n 's/.*scenario-time \(passed\|failed\).*/\1/p' "$f" > status_summary.txt
+            
+            paste names_summary.txt status_summary.txt | while IFS=$'\t' read -r name status; do
+              STATUS_UPPER=$(echo "$status" | tr '[:lower:]' '[:upper:]')
+              if [ "$STATUS_UPPER" = "PASSED" ]; then
+                EMOJI="✅"
+              else
+                EMOJI="❌"
+              fi
+              echo "| $name | $EMOJI $STATUS_UPPER |" >> $GITHUB_STEP_SUMMARY
+            done
+          done
+          
+          rm -f names_summary.txt status_summary.txt || true
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔗 Enlaces Útiles" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 📄 [Ver reporte completo en GitHub Pages](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/${{ github.run_number }}/karate-summary.html)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 [Descargar artefactos](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
 
 
       # Crear una carpeta con SOLO los archivos del reporte (para evitar nested-zip)
