@@ -1,0 +1,38 @@
+{
+  "200": {
+    "success": "#boolean",
+    "message": "#string",
+    "data": {
+      "Apellidos": "#string",
+      "Nombres": "#string",
+      "Rol": "#string",
+      "token": "#string",
+      "Google_Drive_Foto_ID": "##string",
+      "Genero": "#string"
+    }
+  },
+  "400": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "401": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "403": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "500": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  }
+}

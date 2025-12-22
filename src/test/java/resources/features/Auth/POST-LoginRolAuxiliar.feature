@@ -1,206 +1,159 @@
-@POST-LoginRolAuxiliar
+@postLoginRolAuxiliar
 Feature: Login de usuario auxiliar - Pruebas de Contrato API
 
 Background:
     * url urlBase
     * header Content-Type = "application/json"
-    * def requestExitoso = read("classpath:resources/request/POST-ApiLoginRol/request.json")
+    * def requestExitoso = read("classpath:resources/functional/request/Auth/requestAuxiliar.json")
+    * def schemas = read('classpath:resources/functional/schema/LoginSuccessResponse.json')
 
-# 1. 🔵 Smoke
-@contract @smoke @post @test1
-Scenario: Validar que el servicio de login responde correctamente
+# =======================================================================
+# 1. 🔵 SMOKE Y HAPPY PATH 
+# =======================================================================
+@contract @smoke @post @happy-path
+Scenario: Validar que el servicio de login responde correctamente para el rol auxiliar
     Given path "api/login/auxiliar"
     And request requestExitoso
     When method POST
     Then status 200 
 
-# 2. 🔵 Happy Path
-@contract @happy-path @post @test2
-Scenario Outline: Validar que el servicio de login permite acceder por el <description>
-    Given path "api/login/" + route
+# =======================================================================
+# 2. 🧩 SCHEMA VALIDATION
+# =======================================================================
+@contract @schema @post 
+Scenario: Validar que el servicio de login devuelve una respuesta correcta cuando se accede por el rol auxiliar
+    Given path "api/login/auxiliar"
     And request requestExitoso
-    * set requestExitoso.Nombre_Usuario = usuario
-    * set requestExitoso.Contraseña = contrasena
     When method POST
-    Then status 200 
-    Examples: 
-        | route                      | usuario               | contrasena | description                                        |
-        | auxiliar                   | brigida_gonzales_1535 | 15357278   | rol de auxiliar                                    |
+    Then status 200
+    And match response == schemas['200']
 
-# 3. 🧩 Schema Validation
-
-@contract @smoke @post @test3
-Scenario Outline: Validar que el servicio de login devuelve una respuesta correcta cuando se accede por el <description>
-    Given path "api/login/" + route
-    And request requestExitoso
-    * set requestExitoso.Nombre_Usuario = usuario
-    * set requestExitoso.Contraseña = contrasena
-    When method POST
-    Then status 200 
-    And match response ==
-    """
-    {
-    "success": "#boolean",
-    "message": "#string",
-    "data": {
-        "Apellidos": "#string",
-        "Nombres": "#string",
-        "Rol": "#string",
-        "token": "#string",
-        "Google_Drive_Foto_ID": "#string",
-        "Genero": "#string"
-    }
-    }
-    """
-
-    Examples: 
-        | route                      | usuario               | contrasena | description                                        |
-        | auxiliar                   | brigida_gonzales_1535 | 15357278   | rol de auxiliar                                    |
-
-# 4. 📋 Headers Validation
+# =======================================================================
+# 3. 📋 HEADERS VALIDATION
+# =======================================================================
 @contract @headers @post
-Scenario: Validar headers obligatorios y de respuesta
+Scenario: Validar headers de respuesta al acceder por el rol auxiliar
     Given path "api/login/auxiliar"
-    And header Content-Type = "application/json"
     And request requestExitoso
     When method POST
     Then status 200
     And match responseHeaders['Content-Type'][0] contains "application/json"
 
-
-
-# 5. ❌ Error Handling 🏷️ Field Validation
-@contract @error-handling @post 
-Scenario Outline: Validar manejo de errores del endpoint
+# =======================================================================
+# 4. ❌ ERROR HANDLING 🏷️ FIELD VALIDATION
+# =======================================================================
+@contract @error-handling @post
+Scenario Outline: Validar <descripcion> con rol auxiliar
     Given path "api/login/auxiliar"
     And request <body>
     When method POST
     Then status 400
+    And match response == schemas['400']
     And match response.success == false
     * match response.message == "El nombre de usuario y la contraseña son obligatorios"
     * match response.errorType == "MISSING_PARAMETERS"
 
     Examples:
-        | body                                                        |
-        | {}                                                          |
-        | { "Nombre_Usuario": "" , "Contraseña": "123" }              | 
-        | { "Nombre_Usuario": "test" , "Contraseña": "" }             | 
-        | { "Nombre_Usuario": "", "Contraseña": "" }                  |
+        | descripcion                                                           | body                                                |
+        | ausencia de campos obligatorios con body vacío                        | {}                                                  |
+        | ausencia de campo nombre de usuario con valor vacío                   | { "Nombre_Usuario": "" , "Contraseña": "123" }      |
+        | ausencia de campo contraseña con valor vacío                          | { "Nombre_Usuario": "test" , "Contraseña": "" }     |
+        | ausencia de ambos campos obligatorios con valores vacíos              | { "Nombre_Usuario": "", "Contraseña": "" }          |
 
-
-@contract @error-handling @post 
-Scenario Outline: Validar manejo de errores del endpoint
-    Given path "api/login/auxiliar"
+@contract @error-handling @post
+Scenario Outline: Validar <descripcion> con rol auxiliar
+    Given path "api/login/directivo"
     And request <body>
     When method POST
     Then status 401
+    And match response == schemas['401']
     And match response.success == false
     * match response.message == "Credenciales inválidas"
     * match response.errorType == "INVALID_CREDENTIALS"
     
     Examples: 
-        | body                                                        | 
-        | { "Nombre_Usuario": "noExiste" , "Contraseña": "123" }      | 
-        | { "Nombre_Usuario": "director.asuncion8", "Contraseña": "x"}| 
-
-# 6. 🔠 Data Types  #REPORTAR COMO BUG
-@contract @data-types @post
-Scenario Outline: Validar tipos de datos inválidos
-    Given path "api/login/auxiliar"
-    And request <body>
-    When method POST
-    Then status 400
-
-    Examples:
-        | body |
-        | { "Nombre_Usuario": 123, "Contraseña": "123" }  |
-        | { "Nombre_Usuario": "test", "Contraseña": 123 } |
-        | { "Nombre_Usuario": [], "Contraseña": "123" }   |
-        | { "Nombre_Usuario": "test", "Contraseña": {} }  |
+        | descripcion                                                           | body                                                        | 
+        | que no se permite el acceso con usuario inexistente                   | { "Nombre_Usuario": "noExiste" , "Contraseña": "123" }      | 
+        | que no se permite el acceso con contraseña incorrecta                 | { "Nombre_Usuario": "director.asuncion8", "Contraseña": "x"}| 
 
 # =======================================================================
-# 🛡️ SECURITY CONTRACT TESTING — Validación de vulnerabilidades OWASP
+# 5. 🔠 DATA TYPES (REPORTAR COMO BUG)
 # =======================================================================
-
-# 9. 🚨 SQL Injection Attempts
-@contract @security @sql-injection @post
-Scenario Outline: Intentos de SQL Injection deben ser rechazados
+@contract @data-types @post @bug
+Scenario Outline: Validar <descripcion> con rol auxiliar
     Given path "api/login/auxiliar"
-    And request
-    """
-    {
-        "Nombre_Usuario": "<payload>",
-        "Contraseña": "<payload>"
-    }
-    """
+    And request requestExitoso
+    * set requestExitoso.Nombre_Usuario = usuario
+    * set requestExitoso.Contraseña = contrasena
     When method POST
     Then status 400
-    And match response.error == "Petición bloqueada por seguridad"
-    * match response.message == "Se ha detectado contenido potencialmente malicioso en la petición"
-    * match response.code == "SQL_INJECTION_DETECTED"
-    * match response.timestamp == "#string"
+    And match response == schemas['400']
 
     Examples:
-        | payload |
-        | ' OR '1'='1                  |
-        | '; DROP TABLE usuarios; --   |
-        | ' OR 1=1 --                  |
-        | ' UNION SELECT NULL, NULL -- |
+        | descripcion                                                      | usuario               | contrasena       |
+        | tipo de dato inválido número en campo usuario                   | 123                   | "12345678P"      |
+        | tipo de dato inválido número en campo contraseña                | "director.asuncion8"  | 123              |
+        | tipo de dato inválido array en campo usuario                    | []                    | "12345678P"      |
+        | tipo de dato inválido objeto en campo contraseña                | "director.asuncion8"  | {}               |
 
+# =======================================================================
+# 6. 🛡️ SECURITY CONTRACT TESTING — Validación de vulnerabilidades OWASP
+# =======================================================================
 
-# 10. 🧨 XSS Injection
+# 🧨 XSS Injection
 @contract @security @xss @post
-Scenario Outline: Intentos de Cross-Site Scripting deben ser bloqueados
+Scenario Outline: Validar <descripcion> con rol auxiliar
     Given path "api/login/auxiliar"
-    And request
-    """
-    {
-        "Nombre_Usuario": "<xss>",
-        "Contraseña": "<xss>"
-    }
-    """
+    And request requestExitoso
+    * set requestExitoso.Nombre_Usuario = xss
+    * set requestExitoso.Contraseña = xss
     When method POST
     Then status 401
+    And match response == schemas['401']
     And match response.success == false
     * match response.message == "Credenciales inválidas"
     * match response.errorType == "INVALID_CREDENTIALS"
 
     Examples:
-        | xss |
-        | <script>alert(1)</script>                   |
-        | <img src=x onerror=alert('XSS')>            |
-        | javascript:alert('XSS')                     |
-        | <svg/onload=alert(1)>                       |
-        | <iframe src='javascript:alert(1)'></iframe> |
+        | descripcion                                                      | xss                                         |
+        | intento de XSS con script tag                                    | <script>alert(1)</script>                   |
+        | intento de XSS con img tag y onerror                             | <img src=x onerror=alert('XSS')>            |
+        | intento de XSS con javascript protocol                           | javascript:alert('XSS')                     |
+        | intento de XSS con svg tag y onload                              | <svg/onload=alert(1)>                       |
+        | intento de XSS con iframe tag y javascript protocol              | <iframe src='javascript:alert(1)'></iframe> |
 
 
-# 12. 🧱 Payload Tampering (JSON Manipulation)
+# 🧱 Payload Tampering (JSON Manipulation)
 @contract @security @json-tamper @post
-Scenario Outline: Enviar tipos de datos inesperados
+Scenario Outline: Validar <descripcion> con rol auxiliar
     Given path "api/login/auxiliar"
     And request <payload>
     When method POST
     Then status 400
+    And match response == schemas['400']
 
     Examples:
-        | payload |
-        | "null"                                                |
-        | "[]"                                                  |
-        | "\"string-maliciosa\""                                | 
-        | "{ \"Nombre_Usuario\": true, \"Contraseña\": false }" |
+        | descripcion                                                      | payload                                               |
+        | payload tampering con valor null                                 | "null"                                                |
+        | payload tampering con array vacío                                | "[]"                                                  |
+        | payload tampering con string maliciosa                           | "\"string-maliciosa\""                                |
+        | payload tampering con booleanos en campos de credenciales        | "{ \"Nombre_Usuario\": true, \"Contraseña\": false }" |
 
 
-# 14. 🌐 HTTP Header Injection  #ES BUG
-@contract @security @header-injection @post
-Scenario Outline: Cabeceras manipuladas deben ser rechazadas o ignoradas
+# 🌐 HTTP Header Injection  #ES BUG
+@contract @security @header-injection @post @uos
+Scenario Outline: Validar inyección en cabeceras HTTP al acceder por el rol auxiliar <descripcion>
     Given path "api/login/auxiliar"
     And header Authorization = <inject>
     And request requestExitoso
     When method POST
     Then status 400
+    And match response == schemas['400']
 
     Examples:
-        | inject |
-        | "Bearer null\r\nInjectedHeader: evil" |
-        | "\nX-Hacked: 1"                       |
-        | "Bearer <script>hack()</script>"      |
+        | descripcion                                                          | inject                                |
+        | Header Injection - bearer con salto de línea e inyección maliciosa   | "Bearer null\r\nInjectedHeader: evil" |
+        | Header Injection - salto de línea con cabecera X-Hacked              | "\nX-Hacked: 1"                       |
+        | Header Injection - script XSS en Authorization header                | "Bearer <script>hack()</script>"      |
+
+
