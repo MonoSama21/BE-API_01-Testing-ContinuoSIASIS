@@ -1,28 +1,29 @@
-@postLoginRolAuxiliar
-Feature: Login de usuario auxiliar - Pruebas de Contrato API
+@postLoginRolDirectivo
+Feature: Login de usuario directivo - Pruebas de Contrato API
 
 Background:
     * url urlBase
     * header Content-Type = "application/json"
-    * def requestExitoso = read("classpath:resources/functional/request/Auth/requestAuxiliar.json")
+    * def requestExitoso = read("classpath:resources/functional/request/Auth/requestDirectivo.json")
     * def schemas = read('classpath:resources/functional/schema/LoginSuccessResponse.json')
 
 # =======================================================================
 # 1. 🔵 SMOKE Y HAPPY PATH 
 # =======================================================================
-@contract @smoke @post @happy-path
-Scenario: Validar que el servicio de login responde correctamente para el rol auxiliar
-    Given path "api/login/auxiliar"
+@contract @smoke @post @happy-path @tokenDirectivo
+Scenario: Validar que el servicio de login responde correctamente para el rol directivo
+    Given path "api/login/directivo"
     And request requestExitoso
     When method POST
-    Then status 200 
+    Then status 200
+    * def token = response.data.token 
 
 # =======================================================================
 # 2. 🧩 SCHEMA VALIDATION
 # =======================================================================
 @contract @schema @post 
-Scenario: Validar que el servicio de login devuelve una respuesta correcta cuando se accede por el rol auxiliar
-    Given path "api/login/auxiliar"
+Scenario: Validar que el servicio de login devuelve una respuesta correcta cuando se accede por el rol directivo
+    Given path "api/login/directivo"
     And request requestExitoso
     When method POST
     Then status 200
@@ -32,8 +33,8 @@ Scenario: Validar que el servicio de login devuelve una respuesta correcta cuand
 # 3. 📋 HEADERS VALIDATION
 # =======================================================================
 @contract @headers @post
-Scenario: Validar headers de respuesta al acceder por el rol auxiliar
-    Given path "api/login/auxiliar"
+Scenario: Validar headers de respuesta al acceder por el rol directivo
+    Given path "api/login/directivo"
     And request requestExitoso
     When method POST
     Then status 200
@@ -43,8 +44,8 @@ Scenario: Validar headers de respuesta al acceder por el rol auxiliar
 # 4. ❌ ERROR HANDLING 🏷️ FIELD VALIDATION
 # =======================================================================
 @contract @error-handling @post
-Scenario Outline: Validar <descripcion> con rol auxiliar
-    Given path "api/login/auxiliar"
+Scenario Outline: Validar <descripcion> con rol directivo
+    Given path "api/login/directivo"
     And request <body>
     When method POST
     Then status 400
@@ -61,7 +62,7 @@ Scenario Outline: Validar <descripcion> con rol auxiliar
         | ausencia de ambos campos obligatorios con valores vacíos              | { "Nombre_Usuario": "", "Contraseña": "" }          |
 
 @contract @error-handling @post
-Scenario Outline: Validar <descripcion> con rol auxiliar
+Scenario Outline: Validar <descripcion> con rol directivo
     Given path "api/login/directivo"
     And request <body>
     When method POST
@@ -80,8 +81,8 @@ Scenario Outline: Validar <descripcion> con rol auxiliar
 # 5. 🔠 DATA TYPES (REPORTAR COMO BUG)
 # =======================================================================
 @contract @data-types @post @bug
-Scenario Outline: Validar <descripcion> con rol auxiliar
-    Given path "api/login/auxiliar"
+Scenario Outline: Validar <descripcion> con rol directivo
+    Given path "api/login/directivo"
     And request requestExitoso
     * set requestExitoso.Nombre_Usuario = usuario
     * set requestExitoso.Contraseña = contrasena
@@ -102,8 +103,8 @@ Scenario Outline: Validar <descripcion> con rol auxiliar
 
 # 🧨 XSS Injection
 @contract @security @xss @post
-Scenario Outline: Validar <descripcion> con rol auxiliar
-    Given path "api/login/auxiliar"
+Scenario Outline: Validar <descripcion> con rol directivo
+    Given path "api/login/directivo"
     And request requestExitoso
     * set requestExitoso.Nombre_Usuario = xss
     * set requestExitoso.Contraseña = xss
@@ -125,8 +126,8 @@ Scenario Outline: Validar <descripcion> con rol auxiliar
 
 # 🧱 Payload Tampering (JSON Manipulation)
 @contract @security @json-tamper @post
-Scenario Outline: Validar <descripcion> con rol auxiliar
-    Given path "api/login/auxiliar"
+Scenario Outline: Validar <descripcion> con rol directivo
+    Given path "api/login/directivo"
     And request <payload>
     When method POST
     Then status 400
@@ -142,8 +143,8 @@ Scenario Outline: Validar <descripcion> con rol auxiliar
 
 # 🌐 HTTP Header Injection  #ES BUG
 @contract @security @header-injection @post @uos
-Scenario Outline: Validar inyección en cabeceras HTTP al acceder por el rol auxiliar <descripcion>
-    Given path "api/login/auxiliar"
+Scenario Outline: Validar inyección en cabeceras HTTP al acceder por el rol directivo <descripcion>
+    Given path "api/login/directivo"
     And header Authorization = <inject>
     And request requestExitoso
     When method POST
