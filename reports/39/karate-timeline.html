@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Karate Timeline</title>
+    <style>
+      body, html { font-family: arial, sans-serif; font-size: 11pt; }
+      #visualization { box-sizing: border-box; width: 100%; height: 300px; }
+      .vis-item.failed { background-color: #F2928C; }
+      .page-heading { padding: 0.5em; margin-bottom: 0.5em; background-color: lightcyan; border: 1px solid gray; }
+    </style>
+    <script src="res/vis.min.js"></script>
+    <link href="res/vis.min.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class="page-heading">
+      <a href="karate-summary.html">Summary</a>
+    </div>     
+    <div id="visualization"></div>
+    <script>
+var groups = [{"content":"pool-2-thread-1","id":1},{"content":"pool-2-thread-2","id":2},{"content":"pool-2-thread-3","id":3},{"content":"pool-2-thread-4","id":4},{"content":"pool-2-thread-5","id":5}];
+var items = [{"id":1,"group":1,"content":"resources\/features\/MisDatos\/Auxiliar\/GET-MisDatosAuxiliar[1:10]","start":1766442082422,"end":1766442086392,"title":"resources\/features\/MisDatos\/Auxiliar\/GET-MisDatosAuxiliar[1:10] 22:21:22.422-22:21:26.392 Validar que el servicio GET Mis Datos Auxiliar responde correctamente","className":"failed"},{"id":2,"group":2,"content":"resources\/features\/MisDatos\/Directivo\/GET-MisDatosDirectivo[1:10]","start":1766442082422,"end":1766442086973,"title":"resources\/features\/MisDatos\/Directivo\/GET-MisDatosDirectivo[1:10] 22:21:22.422-22:21:26.973 Validar que el servicio GET Mis Datos Directivo responde correctamente"},{"id":3,"group":3,"content":"resources\/features\/MisDatos\/PersonalAdministrativo\/GET-MisDatosPersonalAdministrativo[1:11]","start":1766442082424,"end":1766442086549,"title":"resources\/features\/MisDatos\/PersonalAdministrativo\/GET-MisDatosPersonalAdministrativo[1:11] 22:21:22.424-22:21:26.549 Validar que el servicio GET Mis Datos Personal Administrativo responde correctamente"},{"id":4,"group":4,"content":"resources\/features\/MisDatos\/ProfesorPrimaria\/GET-MisDatosProfesorPrimaria[1:11]","start":1766442082422,"end":1766442086618,"title":"resources\/features\/MisDatos\/ProfesorPrimaria\/GET-MisDatosProfesorPrimaria[1:11] 22:21:22.422-22:21:26.618 Validar que el servicio GET Mis Datos Profesor Primaria responde correctamente"},{"id":5,"group":5,"content":"resources\/features\/MisDatos\/ProfesorSecundaria\/GET-MisDatosProfesorSecundaria[1:11]","start":1766442082422,"end":1766442084847,"title":"resources\/features\/MisDatos\/ProfesorSecundaria\/GET-MisDatosProfesorSecundaria[1:11] 22:21:22.422-22:21:24.847 Validar que el servicio GET Mis Datos Profesor Secundaria responde correctamente"},{"id":6,"group":5,"content":"resources\/features\/MisDatos\/TutorSecundaria\/GET-MisDatosTutorSecundaria[1:11]","start":1766442084851,"end":1766442085508,"title":"resources\/features\/MisDatos\/TutorSecundaria\/GET-MisDatosTutorSecundaria[1:11] 22:21:24.851-22:21:25.508 Validar que el servicio GET Mis Datos Tutor Secundaria responde correctamente"}];
+</script>
+    <script>
+      var container = document.getElementById('visualization');
+      var timeline = new vis.Timeline(container);
+      timeline.setOptions({groupOrder: 'content'});
+      timeline.setGroups(new vis.DataSet(groups));
+      timeline.setItems(new vis.DataSet(items));
+    </script>
+  </body>
+</html>
