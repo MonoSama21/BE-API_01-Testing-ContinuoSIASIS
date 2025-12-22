@@ -1,4 +1,4 @@
-name: 🚀 Karate API Tests - Manual
+name: 🚀 Karate API Tests - Manual & Scheduled
 
 on:
   workflow_dispatch:
@@ -19,6 +19,12 @@ on:
         description: "Correo donde llegarán las notificaciones"
         required: true
         type: string
+  
+  schedule:
+    # Lunes a Viernes a las 8 AM (Perú UTC-5 = 13:00 UTC)
+    - cron: '0 13 * * 1-5'
+    # Sábados y Domingos a las 10 AM (Perú UTC-5 = 15:00 UTC)
+    - cron: '0 15 * * 0,6'
 
 jobs:
   run-karate-tests:
@@ -31,6 +37,32 @@ jobs:
 
     steps:
 
+      - name: 🎯 Determinar tag y parámetros según trigger
+        id: setup
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # Detectar qué cron se ejecutó basado en la hora UTC
+            HOUR=$(date -u +%H)
+            DAY=$(date -u +%u)  # 1=Lunes, 7=Domingo
+            
+            if [ "$HOUR" = "13" ] && [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ]; then
+              # Lunes a Viernes a las 13:00 UTC (8 AM Perú)
+              echo "tag=@postLoginRolDirectivo" >> $GITHUB_OUTPUT
+            elif [ "$HOUR" = "15" ] && ([ "$DAY" = "6" ] || [ "$DAY" = "7" ]); then
+              # Sábado o Domingo a las 15:00 UTC (10 AM Perú)
+              echo "tag=@postLoginRolAuxiliar" >> $GITHUB_OUTPUT
+            else
+              echo "tag=@postLoginRolDirectivo" >> $GITHUB_OUTPUT
+            fi
+            echo "ambiente=QA" >> $GITHUB_OUTPUT
+            echo "correo=2101010261@undc.edu.pe" >> $GITHUB_OUTPUT
+          else
+            # Ejecución manual
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+            echo "ambiente=${{ github.event.inputs.ambiente }}" >> $GITHUB_OUTPUT
+            echo "correo=${{ github.event.inputs.correo }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: 📥 Checkout del repositorio
         uses: actions/checkout@v4
 
@@ -40,6 +72,10 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+
+
+
+
       - name: ✉️ Notificar INICIO de ejecución
         uses: dawidd6/action-send-mail@v3
         with:
@@ -47,9 +83,9 @@ jobs:
           server_port: ${{ secrets.MAIL_PORT }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          to: ${{ github.event.inputs.correo }}
+          to: ${{ steps.setup.outputs.correo }}
           from: ${{ secrets.MAIL_USERNAME }}
-          subject: "🔵 Inicio de ejecución Karate – Tag: ${{ github.event.inputs.tag }}"
+          subject: "🔵 Inicio de ejecución Karate – Tag: ${{ steps.setup.outputs.tag }}"
           html_body: |
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
               <h2 style="color: #1a73e8; margin-bottom: 10px;">🔵 Ejecución de Pruebas Karate – Iniciada</h2>
@@ -61,11 +97,11 @@ jobs:
               <table style="border-collapse: collapse; margin-top: 15px;">
                 <tr>
                   <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Tag seleccionado:</td>
-                  <td style="padding: 8px 12px;">${{ github.event.inputs.tag }}</td>
+                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.tag }}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Ambiente:</td>
-                  <td style="padding: 8px 12px;">${{ github.event.inputs.ambiente }}</td>
+                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.ambiente }}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Fecha/Hora:</td>
@@ -90,7 +126,7 @@ jobs:
         id: karate
         run: |
           echo "karate_failed=false" >> $GITHUB_OUTPUT
-          mvn test -Dkarate.options="--tags ${{ github.event.inputs.tag }}" -Dkarate.env=${{ github.event.inputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
+          mvn test -Dkarate.options="--tags ${{ steps.setup.outputs.tag }}" -Dkarate.env=${{ steps.setup.outputs.ambiente }} || echo "karate_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       # Detectar dinámicamente el JSON resumen (varía por versiones)
@@ -163,8 +199,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Parámetro | Valor |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏷️ Tag ejecutado | \`${{ github.event.inputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🌍 Ambiente | \`${{ github.event.inputs.ambiente }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏷️ Tag ejecutado | \`${{ steps.setup.outputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌍 Ambiente | \`${{ steps.setup.outputs.ambiente }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 📅 Fecha/Hora | $(date '+%Y-%m-%d %H:%M:%S') |" >> $GITHUB_STEP_SUMMARY
           echo "| ✅ Estado | ${{ steps.karate.outputs.karate_failed == 'true' && '❌ FAILED' || '✅ PASSED' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -273,9 +309,9 @@ jobs:
             <ul class="report-list">
               <li class="report-item">
                 <a class="report-link" href="reports/${{ github.run_number }}/karate-summary.html">
-                  📄 Reporte #${{ github.run_number }} - Tag: ${{ github.event.inputs.tag }}
+                  📄 Reporte #${{ github.run_number }} - Tag: ${{ steps.setup.outputs.tag }}
                 </a>
-                <div class="report-date">Ambiente: ${{ github.event.inputs.ambiente }} | Fecha: $(date '+%Y-%m-%d %H:%M:%S')</div>
+                <div class="report-date">Ambiente: ${{ steps.setup.outputs.ambiente }} | Fecha: $(date '+%Y-%m-%d %H:%M:%S')</div>
               </li>
             </ul>
           </body>
@@ -300,9 +336,9 @@ jobs:
           server_port: ${{ secrets.MAIL_PORT }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          to: ${{ github.event.inputs.correo }}
+          to: ${{ steps.setup.outputs.correo }}
           from: ${{ secrets.MAIL_USERNAME }}
-          subject: "🟢 Resultados Karate – Tag: ${{ github.event.inputs.tag }}"
+          subject: "🟢 Resultados Karate – Tag: ${{ steps.setup.outputs.tag }}"
           html_body: |
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
               <h2 style="color: #34a853; margin-bottom: 10px;">🟢 Resultados de Pruebas Karate</h2>
@@ -312,11 +348,11 @@ jobs:
               <table style="border-collapse: collapse; margin-top: 15px;">
                 <tr>
                   <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Tag ejecutado:</td>
-                  <td style="padding: 8px 12px;">${{ github.event.inputs.tag }}</td>
+                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.tag }}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Ambiente:</td>
-                  <td style="padding: 8px 12px;">${{ github.event.inputs.ambiente }}</td>
+                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.ambiente }}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Estado general:</td>
