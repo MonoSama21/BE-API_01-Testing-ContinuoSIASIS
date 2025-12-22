@@ -78,6 +78,8 @@ jobs:
 
       - name: ✉️ Notificar INICIO de ejecución
         uses: dawidd6/action-send-mail@v3
+        env:
+          TZ: America/Lima
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
@@ -85,38 +87,92 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           to: ${{ steps.setup.outputs.correo }}
           from: ${{ secrets.MAIL_USERNAME }}
-          subject: "🔵 Inicio de ejecución Karate – Tag: ${{ steps.setup.outputs.tag }}"
+          subject: "🔵 Inicio de Pruebas Karate – ${{ steps.setup.outputs.tag }}"
           html_body: |
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-              <h2 style="color: #1a73e8; margin-bottom: 10px;">🔵 Ejecución de Pruebas Karate – Iniciada</h2>
-
-              <p>Hola,</p>
-
-              <p>Se ha iniciado la ejecución automática de pruebas <strong>Karate API</strong>.</p>
-
-              <table style="border-collapse: collapse; margin-top: 15px;">
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f7fa;">
                 <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Tag seleccionado:</td>
-                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.tag }}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Ambiente:</td>
-                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.ambiente }}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Fecha/Hora:</td>
-                  <td style="padding: 8px 12px;">$(date)</td>
+                  <td align="center" style="padding: 40px 20px;">
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+                      
+                      <!-- Header con logo -->
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); padding: 30px; text-align: center;">
+                          <img src="https://res.cloudinary.com/dvrsdqsl1/image/upload/v1764399269/Blue_Minimalist_Technology_Cube_Logo_1_x445ab.png" alt="Logo" style="max-width: 120px; height: auto; margin-bottom: 15px;">
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🔵 Ejecución de Pruebas Iniciada</h1>
+                        </td>
+                      </tr>
+                      
+                      <!-- Contenido -->
+                      <tr>
+                        <td style="padding: 40px 30px;">
+                          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                            Estimado/a,
+                          </p>
+                          <p style="color: #555555; font-size: 15px; line-height: 1.6; margin: 0 0 30px 0;">
+                            Se ha iniciado la ejecución automática de pruebas <strong style="color: #1a73e8;">Karate API</strong> en el sistema de testing continuo.
+                          </p>
+                          
+                          <!-- Información de ejecución -->
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; border-radius: 8px; overflow: hidden; margin-bottom: 30px;">
+                            <tr>
+                              <td style="padding: 20px;">
+                                <table width="100%" cellpadding="8" cellspacing="0" border="0">
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; width: 35%;">🏷️ Tag seleccionado:</td>
+                                    <td style="color: #1a73e8; font-size: 14px; font-weight: 600;">${{ steps.setup.outputs.tag }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">🌍 Ambiente:</td>
+                                    <td style="color: #1a73e8; font-size: 14px; font-weight: 600; padding-top: 10px;">${{ steps.setup.outputs.ambiente }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">📅 Fecha/Hora:</td>
+                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">$(TZ=America/Lima date '+%d/%m/%Y %H:%M:%S %Z')</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">🔢 Ejecución #:</td>
+                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">${{ github.run_number }}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          
+                          <!-- Nota informativa -->
+                          <div style="background-color: #e3f2fd; border-left: 4px solid #1a73e8; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                            <p style="color: #1565c0; font-size: 14px; margin: 0; line-height: 1.5;">
+                              <strong>ℹ️ Información:</strong> Recibirás una notificación automática con los resultados cuando la ejecución finalice.
+                            </p>
+                          </div>
+                          
+                          <p style="color: #555555; font-size: 14px; line-height: 1.6; margin: 20px 0 0 0;">
+                            Saludos cordiales,<br>
+                            <strong style="color: #1a73e8;">Sistema Automático de QA</strong>
+                          </p>
+                        </td>
+                      </tr>
+                      
+                      <!-- Footer -->
+                      <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px 30px; border-top: 1px solid #e0e0e0;">
+                          <p style="color: #999999; font-size: 12px; margin: 0; text-align: center;">
+                            GitHub Actions · Testing Continuo · $(TZ=America/Lima date '+%Y')
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
                 </tr>
               </table>
-
-              <p style="margin-top: 20px;">
-                Recibirás una notificación al finalizar la ejecución.
-              </p>
-
-              <p style="margin-top: 25px; color: #555; font-size: 12px;">
-                Sistema Automático de QA · GitHub Actions
-              </p>
-            </div>
+            </body>
+            </html>
 
 
       - name: 📦 Instalar dependencias
@@ -692,6 +748,8 @@ jobs:
       - name: ✉️ Notificar FIN de ejecución (con tabla y link al artefacto)
         if: always()
         uses: dawidd6/action-send-mail@v3
+        env:
+          TZ: America/Lima
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
@@ -699,54 +757,118 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           to: ${{ steps.setup.outputs.correo }}
           from: ${{ secrets.MAIL_USERNAME }}
-          subject: "🟢 Resultados Karate – Tag: ${{ steps.setup.outputs.tag }}"
+          subject: "🟢 Resultados de Pruebas Karate – ${{ steps.setup.outputs.tag }}"
           html_body: |
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-              <h2 style="color: #34a853; margin-bottom: 10px;">🟢 Resultados de Pruebas Karate</h2>
-
-              <p>La ejecución de pruebas <strong>ha finalizado</strong>. Aquí tienes el resumen:</p>
-
-              <table style="border-collapse: collapse; margin-top: 15px;">
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f7fa;">
                 <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Tag ejecutado:</td>
-                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.tag }}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Ambiente:</td>
-                  <td style="padding: 8px 12px;">${{ steps.setup.outputs.ambiente }}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Estado general:</td>
-                  <td style="padding: 8px 12px;">
-                    <strong>
-                      ${{ steps.karate.outputs.karate_failed == 'true' && '❌ FAILED' || '✅ PASSED' }}
-                    </strong>
+                  <td align="center" style="padding: 40px 20px;">
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+                      
+                      <!-- Header con logo -->
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #34a853 0%, #1e8e3e 100%); padding: 30px; text-align: center;">
+                          <img src="https://res.cloudinary.com/dvrsdqsl1/image/upload/v1764399269/Blue_Minimalist_Technology_Cube_Logo_1_x445ab.png" alt="Logo" style="max-width: 120px; height: auto; margin-bottom: 15px;">
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🟢 Resultados de Pruebas</h1>
+                        </td>
+                      </tr>
+                      
+                      <!-- Contenido -->
+                      <tr>
+                        <td style="padding: 40px 30px;">
+                          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                            Estimado/a,
+                          </p>
+                          <p style="color: #555555; font-size: 15px; line-height: 1.6; margin: 0 0 30px 0;">
+                            La ejecución de pruebas <strong style="color: #34a853;">Karate API</strong> ha finalizado. A continuación encontrarás el resumen de resultados:
+                          </p>
+                          
+                          <!-- Estado general -->
+                          <div style="background: ${{ steps.karate.outputs.karate_failed == 'true' && 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)' || 'linear-gradient(135deg, #34a853 0%, #1e8e3e 100%)' }}; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 30px;">
+                            <p style="color: #ffffff; font-size: 18px; font-weight: 600; margin: 0;">
+                              Estado: ${{ steps.karate.outputs.karate_failed == 'true' && '❌ FALLÓ' || '✅ EXITOSO' }}
+                            </p>
+                          </div>
+                          
+                          <!-- Información de ejecución -->
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; border-radius: 8px; overflow: hidden; margin-bottom: 30px;">
+                            <tr>
+                              <td style="padding: 20px;">
+                                <table width="100%" cellpadding="8" cellspacing="0" border="0">
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; width: 35%;">🏷️ Tag ejecutado:</td>
+                                    <td style="color: #34a853; font-size: 14px; font-weight: 600;">${{ steps.setup.outputs.tag }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">🌍 Ambiente:</td>
+                                    <td style="color: #34a853; font-size: 14px; font-weight: 600; padding-top: 10px;">${{ steps.setup.outputs.ambiente }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">📅 Fecha/Hora:</td>
+                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">$(TZ=America/Lima date '+%d/%m/%Y %H:%M:%S %Z')</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #666666; font-size: 14px; font-weight: 600; padding-top: 10px;">🔢 Ejecución #:</td>
+                                    <td style="color: #333333; font-size: 14px; padding-top: 10px;">${{ github.run_number }}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          
+                          <!-- Resumen de escenarios -->
+                          <h3 style="color: #333333; font-size: 18px; margin: 0 0 15px 0; border-bottom: 2px solid #34a853; padding-bottom: 10px;">
+                            📊 Resumen de Escenarios
+                          </h3>
+                          <div style="overflow-x: auto; margin-bottom: 30px;">
+                            ${{ steps.table.outputs.summary_table }}
+                          </div>
+                          
+                          <!-- Botón de acción -->
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                            <tr>
+                              <td align="center">
+                                <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/${{ github.run_number }}/karate-summary.html" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 2px 8px rgba(26,115,232,0.3);">
+                                  🌐 Ver Reporte Completo
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                          
+                          <!-- Nota informativa -->
+                          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                            <p style="color: #856404; font-size: 13px; margin: 0; line-height: 1.5;">
+                              <strong>📦 Nota:</strong> También puedes descargar los artefactos del reporte desde la sección de artefactos en GitHub Actions.
+                            </p>
+                          </div>
+                          
+                          <p style="color: #555555; font-size: 14px; line-height: 1.6; margin: 20px 0 0 0;">
+                            Saludos cordiales,<br>
+                            <strong style="color: #34a853;">Sistema Automático de QA</strong>
+                          </p>
+                        </td>
+                      </tr>
+                      
+                      <!-- Footer -->
+                      <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px 30px; border-top: 1px solid #e0e0e0;">
+                          <p style="color: #999999; font-size: 12px; margin: 0; text-align: center;">
+                            GitHub Actions · Testing Continuo · $(TZ=America/Lima date '+%Y')
+                          </p>
+                          <p style="color: #999999; font-size: 11px; margin: 10px 0 0 0; text-align: center;">
+                            <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" style="color: #1a73e8; text-decoration: none;">Ver Historial de Reportes</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
-                <tr>
-                  <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Fecha/Hora:</td>
-                  <td style="padding: 8px 12px;">$(date)</td>
-                </tr>
               </table>
-
-              <h3 style="margin-top: 30px; color:#202124;">📊 Resumen de escenarios</h3>
-
-              <div style="margin-top: 10px;">
-                ${{ steps.table.outputs.summary_table }}
-              </div>
-
-              <p style="margin-top: 20px;">
-                🌐 <strong>Ver reporte en línea:</strong> 
-                <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/${{ github.run_number }}/karate-summary.html">
-                  Click aquí para ver el reporte completo
-                </a>
-              </p>
-
-              <p>
-                También puedes descargar el reporte desde la sección de artefactos del pipeline en GitHub Actions.
-              </p>
-
-              <p style="margin-top: 25px; color: #555; font-size: 12px;">
-                Sistema Automático de QA · GitHub Actions
-              </p>
-            </div>
+            </body>
+            </html>

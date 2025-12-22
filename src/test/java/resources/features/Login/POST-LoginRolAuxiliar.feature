@@ -1,4 +1,4 @@
-@postLoginRolAuxiliar
+@postLoginRolAuxiliar @login
 Feature: Login de usuario auxiliar - Pruebas de Contrato API
 
 Background:
@@ -17,7 +17,7 @@ Scenario: Validar que el servicio de login responde correctamente para el rol au
     When method POST
     Then status 200
     * def token = response.data.token 
-    
+
 # =======================================================================
 # 2. 🧩 SCHEMA VALIDATION
 # =======================================================================
