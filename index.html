@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes Karate - Historial</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+    h1 { color: #1a73e8; }
+    .report-list { list-style: none; padding: 0; }
+    .report-item { 
+      background: white; 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-radius: 5px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .report-link { 
+      color: #1a73e8; 
+      text-decoration: none; 
+      font-size: 18px; 
+      font-weight: bold;
+    }
+    .report-link:hover { text-decoration: underline; }
+    .report-date { color: #666; font-size: 14px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h1>📊 Historial de Reportes Karate</h1>
+  <p>Último reporte generado: <strong>Run #27</strong></p>
+  <ul class="report-list">
+    <li class="report-item">
+      <a class="report-link" href="reports/27/karate-summary.html">
+        📄 Reporte #27 - Tag: @postLoginRolDirectivo
+      </a>
+      <div class="report-date">Ambiente: QA | Fecha: $(date '+%Y-%m-%d %H:%M:%S')</div>
+    </li>
+  </ul>
+</body>
+</html>
