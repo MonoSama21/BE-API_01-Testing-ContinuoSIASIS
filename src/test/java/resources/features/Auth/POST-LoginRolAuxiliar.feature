@@ -1,5 +1,5 @@
-@POST-ApiLoginRol
-Feature: Login de usuario directivo - Pruebas de Contrato API
+@POST-LoginRolAuxiliar
+Feature: Login de usuario auxiliar - Pruebas de Contrato API
 
 Background:
     * url urlBase
@@ -9,7 +9,7 @@ Background:
 # 1. 🔵 Smoke
 @contract @smoke @post @test1
 Scenario: Validar que el servicio de login responde correctamente
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request requestExitoso
     When method POST
     Then status 200 
@@ -25,13 +25,7 @@ Scenario Outline: Validar que el servicio de login permite acceder por el <descr
     Then status 200 
     Examples: 
         | route                      | usuario               | contrasena | description                                        |
-        | directivo                  | director.asuncion8    | 15430124   | rol de directivo                                   |
-        | profesor-primaria          | marisol_godoy_1537    | 15378317   | rol de profesor de primaria                        |
         | auxiliar                   | brigida_gonzales_1535 | 15357278   | rol de auxiliar                                    |
-        | profesor-tutor-secundaria  | david_apolinario_1537 | 15371028   | rol de profesor-tutor secundaria (CASO NO TUTOR)   |
-        | profesor-tutor-secundaria  | daniel_sanchez_1542   | 15420745   | rol de personal tutor secundaria (CASO SI TUTOR)   |
-        | personal-administrativo    | jose_centeno_4180     | 41809910   | rol de personal personal administrativo            |
-
 
 # 3. 🧩 Schema Validation
 
@@ -61,17 +55,12 @@ Scenario Outline: Validar que el servicio de login devuelve una respuesta correc
 
     Examples: 
         | route                      | usuario               | contrasena | description                                        |
-        | directivo                  | director.asuncion8    | 15430124   | rol de directivo                                   |
-        | profesor-primaria          | marisol_godoy_1537    | 15378317   | rol de profesor de primaria                        |
         | auxiliar                   | brigida_gonzales_1535 | 15357278   | rol de auxiliar                                    |
-        | profesor-tutor-secundaria  | david_apolinario_1537 | 15371028   | rol de profesor-tutor secundaria (CASO NO TUTOR)   |
-        | profesor-tutor-secundaria  | daniel_sanchez_1542   | 15420745   | rol de personal tutor secundaria (CASO SI TUTOR)   |
-        | personal-administrativo    | jose_centeno_4180     | 41809910   | rol de personal personal administrativo            |
 
 # 4. 📋 Headers Validation
 @contract @headers @post
 Scenario: Validar headers obligatorios y de respuesta
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And header Content-Type = "application/json"
     And request requestExitoso
     When method POST
@@ -83,7 +72,7 @@ Scenario: Validar headers obligatorios y de respuesta
 # 5. ❌ Error Handling 🏷️ Field Validation
 @contract @error-handling @post 
 Scenario Outline: Validar manejo de errores del endpoint
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request <body>
     When method POST
     Then status 400
@@ -101,7 +90,7 @@ Scenario Outline: Validar manejo de errores del endpoint
 
 @contract @error-handling @post 
 Scenario Outline: Validar manejo de errores del endpoint
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request <body>
     When method POST
     Then status 401
@@ -117,7 +106,7 @@ Scenario Outline: Validar manejo de errores del endpoint
 # 6. 🔠 Data Types  #REPORTAR COMO BUG
 @contract @data-types @post
 Scenario Outline: Validar tipos de datos inválidos
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request <body>
     When method POST
     Then status 400
@@ -136,7 +125,7 @@ Scenario Outline: Validar tipos de datos inválidos
 # 9. 🚨 SQL Injection Attempts
 @contract @security @sql-injection @post
 Scenario Outline: Intentos de SQL Injection deben ser rechazados
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request
     """
     {
@@ -162,7 +151,7 @@ Scenario Outline: Intentos de SQL Injection deben ser rechazados
 # 10. 🧨 XSS Injection
 @contract @security @xss @post
 Scenario Outline: Intentos de Cross-Site Scripting deben ser bloqueados
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request
     """
     {
@@ -188,7 +177,7 @@ Scenario Outline: Intentos de Cross-Site Scripting deben ser bloqueados
 # 12. 🧱 Payload Tampering (JSON Manipulation)
 @contract @security @json-tamper @post
 Scenario Outline: Enviar tipos de datos inesperados
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And request <payload>
     When method POST
     Then status 400
@@ -204,7 +193,7 @@ Scenario Outline: Enviar tipos de datos inesperados
 # 14. 🌐 HTTP Header Injection  #ES BUG
 @contract @security @header-injection @post
 Scenario Outline: Cabeceras manipuladas deben ser rechazadas o ignoradas
-    Given path "api/login/directivo"
+    Given path "api/login/auxiliar"
     And header Authorization = <inject>
     And request requestExitoso
     When method POST
