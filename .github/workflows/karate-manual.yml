@@ -325,14 +325,57 @@ jobs:
             <title>Reportes Karate - Historial</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-              h1 { color: #1a73e8; }
-              .stats { 
+              h1, h2 { color: #1a73e8; }
+              .container { max-width: 1200px; margin: 0 auto; }
+              .stats, .executor-panel { 
                 background: white; 
                 padding: 20px; 
                 border-radius: 5px; 
                 margin-bottom: 20px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
               }
+              .executor-panel { background: #e8f5e9; border-left: 4px solid #34a853; }
+              .form-group { margin-bottom: 15px; }
+              .form-group label { 
+                display: block; 
+                margin-bottom: 5px; 
+                font-weight: bold; 
+                color: #333;
+              }
+              .form-group input, .form-group select { 
+                width: 100%; 
+                padding: 10px; 
+                border: 1px solid #ddd; 
+                border-radius: 4px; 
+                font-size: 14px;
+                box-sizing: border-box;
+              }
+              .form-group input:focus, .form-group select:focus {
+                outline: none;
+                border-color: #1a73e8;
+              }
+              .btn-execute { 
+                background: #1a73e8; 
+                color: white; 
+                padding: 12px 24px; 
+                border: none; 
+                border-radius: 4px; 
+                cursor: pointer; 
+                font-size: 16px;
+                font-weight: bold;
+                width: 100%;
+              }
+              .btn-execute:hover { background: #1557b0; }
+              .btn-execute:disabled { background: #ccc; cursor: not-allowed; }
+              .message { 
+                padding: 12px; 
+                border-radius: 4px; 
+                margin-top: 15px; 
+                display: none;
+              }
+              .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+              .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+              .message.show { display: block; }
               .report-list { list-style: none; padding: 0; }
               .report-item { 
                 background: white; 
@@ -357,29 +400,70 @@ jobs:
                 margin-left: 10px;
               }
               .badge-new { background: #34a853; color: white; }
+              .info-text { color: #666; font-size: 13px; margin-top: 5px; }
             </style>
           </head>
           <body>
-            <h1>📊 Historial de Reportes Karate</h1>
-            <div class="stats">
-              <p><strong>Último reporte generado:</strong> Run #${{ github.run_number }}</p>
-              <p><strong>Tag:</strong> ${{ steps.setup.outputs.tag }}</p>
-              <p><strong>Ambiente:</strong> ${{ steps.setup.outputs.ambiente }}</p>
-              <p><strong>Fecha:</strong> ${CURRENT_DATE}</p>
-            </div>
-            <h2>📋 Historial de Ejecuciones</h2>
-            <ul class="report-list">
+            <div class="container">
+              <h1>📊 Historial de Reportes Karate</h1>
+              
+              <!-- Panel de ejecución -->
+              <div class="executor-panel">
+                <h2>🚀 Ejecutar Nuevas Pruebas</h2>
+                <form id="executionForm">
+                  <div class="form-group">
+                    <label for="githubToken">GitHub Token (PAT)</label>
+                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
+                    <p class="info-text">Necesitas un Personal Access Token con permiso 'workflow'. <a href="https://github.com/settings/tokens/new?scopes=workflow" target="_blank">Crear token</a></p>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="tag">Tag a ejecutar</label>
+                    <input type="text" id="tag" placeholder="@postLoginRolDirectivo" required>
+                    <p class="info-text">Ejemplo: @postLoginRolDirectivo, @security, @smoke</p>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="ambiente">Ambiente</label>
+                    <select id="ambiente" required>
+                      <option value="QA" selected>QA</option>
+                      <option value="DEV">DEV</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="correo">Correo de notificación</label>
+                    <input type="email" id="correo" placeholder="tu-correo@ejemplo.com" value="2101010261@undc.edu.pe" required>
+                  </div>
+                  
+                  <button type="submit" class="btn-execute" id="btnExecute">
+                    ▶️ Ejecutar Pruebas
+                  </button>
+                  
+                  <div id="message" class="message"></div>
+                </form>
+              </div>
+              
+              <div class="stats">
+                <p><strong>Último reporte generado:</strong> Run #${{ github.run_number }}</p>
+                <p><strong>Tag:</strong> ${{ steps.setup.outputs.tag }}</p>
+                <p><strong>Ambiente:</strong> ${{ steps.setup.outputs.ambiente }}</p>
+                <p><strong>Fecha:</strong> ${CURRENT_DATE}</p>
+              </div>
+              
+              <h2>📋 Historial de Ejecuciones</h2>
+              <ul class="report-list">
           EOF
           
           # Agregar reporte actual primero
           cat >> gh-pages-temp/index.html << EOF
-              <li class="report-item">
-                <a class="report-link" href="reports/${{ github.run_number }}/karate-summary.html">
-                  📄 Reporte #${{ github.run_number }} - Tag: ${{ steps.setup.outputs.tag }}
-                </a>
-                <span class="badge badge-new">NUEVO</span>
-                <div class="report-date">Ambiente: ${{ steps.setup.outputs.ambiente }} | Fecha: ${CURRENT_DATE}</div>
-              </li>
+                <li class="report-item">
+                  <a class="report-link" href="reports/${{ github.run_number }}/karate-summary.html">
+                    📄 Reporte #${{ github.run_number }} - Tag: ${{ steps.setup.outputs.tag }}
+                  </a>
+                  <span class="badge badge-new">NUEVO</span>
+                  <div class="report-date">Ambiente: ${{ steps.setup.outputs.ambiente }} | Fecha: ${CURRENT_DATE}</div>
+                </li>
           EOF
           
           # Agregar reportes anteriores
@@ -419,9 +503,71 @@ jobs:
             done
           fi
           
-          # Cerrar HTML
-          cat >> gh-pages-temp/index.html << EOF
-            </ul>
+          # Cerrar HTML con JavaScript
+          cat >> gh-pages-temp/index.html << 'EOF'
+              </ul>
+            </div>
+            
+            <script>
+              const form = document.getElementById('executionForm');
+              const btnExecute = document.getElementById('btnExecute');
+              const message = document.getElementById('message');
+              
+              form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const token = document.getElementById('githubToken').value;
+                const tag = document.getElementById('tag').value;
+                const ambiente = document.getElementById('ambiente').value;
+                const correo = document.getElementById('correo').value;
+                
+                // Deshabilitar botón y mostrar loading
+                btnExecute.disabled = true;
+                btnExecute.textContent = '⏳ Ejecutando...';
+                message.className = 'message';
+                message.style.display = 'none';
+                
+                try {
+                  const response = await fetch('https://api.github.com/repos/${{ github.repository }}/actions/workflows/karate-manual.yml/dispatches', {
+                    method: 'POST',
+                    headers: {
+                      'Accept': 'application/vnd.github.v3+json',
+                      'Authorization': 'token ' + token,
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      ref: 'main',
+                      inputs: {
+                        tag: tag,
+                        ambiente: ambiente,
+                        correo: correo
+                      }
+                    })
+                  });
+                  
+                  if (response.status === 204) {
+                    message.className = 'message success show';
+                    message.textContent = '✅ Pruebas iniciadas correctamente. Recibirás una notificación por correo cuando finalicen.';
+                    form.reset();
+                    document.getElementById('correo').value = '2101010261@undc.edu.pe';
+                    
+                    // Recargar página después de 3 segundos
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 3000);
+                  } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error desconocido');
+                  }
+                } catch (error) {
+                  message.className = 'message error show';
+                  message.textContent = '❌ Error al ejecutar las pruebas: ' + error.message + '. Verifica tu token y permisos.';
+                } finally {
+                  btnExecute.disabled = false;
+                  btnExecute.textContent = '▶️ Ejecutar Pruebas';
+                }
+              });
+            </script>
           </body>
           </html>
           EOF
