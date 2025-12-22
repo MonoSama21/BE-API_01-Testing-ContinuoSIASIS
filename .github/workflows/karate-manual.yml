@@ -271,11 +271,27 @@ jobs:
           destination_dir: reports/${{ github.run_number }}
           keep_files: true
 
-      - name: 📝 Crear índice de reportes
+      - name: 📝 Crear índice de reportes con historial completo
         if: always()
         run: |
+          # Checkout de la rama gh-pages para leer reportes existentes
+          git fetch origin gh-pages:gh-pages || true
+          git checkout gh-pages || true
+          
+          # Obtener lista de reportes existentes
+          REPORTS_DIRS=$(find reports -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -rn || echo "")
+          
+          # Volver a la rama de trabajo
+          git checkout -
+          
+          # Crear carpeta temporal
           mkdir -p gh-pages-temp
-          cat > gh-pages-temp/index.html << 'EOF'
+          
+          # Generar fecha actual
+          CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
+          
+          # Crear HTML con historial completo
+          cat > gh-pages-temp/index.html << EOF
           <!DOCTYPE html>
           <html lang="es">
           <head>
@@ -285,6 +301,13 @@ jobs:
             <style>
               body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
               h1 { color: #1a73e8; }
+              .stats { 
+                background: white; 
+                padding: 20px; 
+                border-radius: 5px; 
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
               .report-list { list-style: none; padding: 0; }
               .report-item { 
                 background: white; 
@@ -301,18 +324,59 @@ jobs:
               }
               .report-link:hover { text-decoration: underline; }
               .report-date { color: #666; font-size: 14px; margin-top: 5px; }
+              .badge { 
+                display: inline-block; 
+                padding: 3px 8px; 
+                border-radius: 3px; 
+                font-size: 12px; 
+                margin-left: 10px;
+              }
+              .badge-new { background: #34a853; color: white; }
             </style>
           </head>
           <body>
             <h1>📊 Historial de Reportes Karate</h1>
-            <p>Último reporte generado: <strong>Run #${{ github.run_number }}</strong></p>
+            <div class="stats">
+              <p><strong>Último reporte generado:</strong> Run #${{ github.run_number }}</p>
+              <p><strong>Tag:</strong> ${{ steps.setup.outputs.tag }}</p>
+              <p><strong>Ambiente:</strong> ${{ steps.setup.outputs.ambiente }}</p>
+              <p><strong>Fecha:</strong> ${CURRENT_DATE}</p>
+            </div>
+            <h2>📋 Historial de Ejecuciones</h2>
             <ul class="report-list">
+          EOF
+          
+          # Agregar reporte actual primero
+          cat >> gh-pages-temp/index.html << EOF
               <li class="report-item">
                 <a class="report-link" href="reports/${{ github.run_number }}/karate-summary.html">
                   📄 Reporte #${{ github.run_number }} - Tag: ${{ steps.setup.outputs.tag }}
                 </a>
-                <div class="report-date">Ambiente: ${{ steps.setup.outputs.ambiente }} | Fecha: $(date '+%Y-%m-%d %H:%M:%S')</div>
+                <span class="badge badge-new">NUEVO</span>
+                <div class="report-date">Ambiente: ${{ steps.setup.outputs.ambiente }} | Fecha: ${CURRENT_DATE}</div>
               </li>
+          EOF
+          
+          # Agregar reportes anteriores
+          if [ -n "$REPORTS_DIRS" ]; then
+            for report_dir in $REPORTS_DIRS; do
+              RUN_NUM=$(basename "$report_dir")
+              # Evitar duplicar el reporte actual
+              if [ "$RUN_NUM" != "${{ github.run_number }}" ]; then
+                cat >> gh-pages-temp/index.html << EOF
+              <li class="report-item">
+                <a class="report-link" href="$report_dir/karate-summary.html">
+                  📄 Reporte #$RUN_NUM
+                </a>
+                <div class="report-date">Reporte histórico</div>
+              </li>
+          EOF
+              fi
+            done
+          fi
+          
+          # Cerrar HTML
+          cat >> gh-pages-temp/index.html << EOF
             </ul>
           </body>
           </html>
