@@ -545,13 +545,24 @@ jobs:
               </li>
           EOF
                 else
-                  # Si no existe metadata, mostrar info básica
+                  # Si no existe metadata, obtener fecha del commit de Git
+                  COMMIT_DATE=$(git log --all --format="%cd" --date=format:'%Y-%m-%d %H:%M:%S' --diff-filter=A -- "$report_dir" 2>/dev/null | head -n1)
+                  
+                  if [ -z "$COMMIT_DATE" ]; then
+                    # Si no se encuentra en git log, intentar con la fecha del último commit que modificó el directorio
+                    COMMIT_DATE=$(git log -1 --format="%cd" --date=format:'%Y-%m-%d %H:%M:%S' -- "$report_dir" 2>/dev/null)
+                  fi
+                  
+                  if [ -z "$COMMIT_DATE" ]; then
+                    COMMIT_DATE="Fecha no disponible"
+                  fi
+                  
                   cat >> gh-pages-temp/index.html << EOF
               <li class="report-item">
                 <a class="report-link" href="$report_dir/karate-summary.html">
                   📄 Reporte #$RUN_NUM
                 </a>
-                <div class="report-date">Reporte histórico (sin metadata)</div>
+                <div class="report-date">Reporte histórico | Fecha: $COMMIT_DATE</div>
               </li>
           EOF
                 fi
