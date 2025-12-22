@@ -1,3 +1,4 @@
+@misDatos
 Feature: Retorna los datos personal del rol Auxiliar - Pruebas de Contrato API
 
 Background:
