@@ -262,6 +262,27 @@ jobs:
           path: karate-report-package
           retention-days: 14
 
+      - name: 📋 Crear metadata del reporte
+        if: always()
+        run: |
+          # Configurar zona horaria de Perú
+          export TZ=America/Lima
+          CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
+          
+          # Crear archivo de metadata JSON
+          cat > karate-report-package/metadata.json << EOF
+          {
+            "run_number": "${{ github.run_number }}",
+            "tag": "${{ steps.setup.outputs.tag }}",
+            "ambiente": "${{ steps.setup.outputs.ambiente }}",
+            "fecha": "${CURRENT_DATE}",
+            "timezone": "America/Lima"
+          }
+          EOF
+          
+          echo "Metadata creado para reporte #${{ github.run_number }}"
+          cat karate-report-package/metadata.json
+
       - name: 🌐 Publicar reporte en GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: always()
@@ -274,6 +295,10 @@ jobs:
       - name: 📝 Crear índice de reportes con historial completo
         if: always()
         run: |
+          # Configurar zona horaria de Perú
+          export TZ=America/Lima
+          CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
+          
           # Checkout de la rama gh-pages para leer reportes existentes
           git fetch origin gh-pages:gh-pages || true
           git checkout gh-pages || true
@@ -363,14 +388,33 @@ jobs:
               RUN_NUM=$(basename "$report_dir")
               # Evitar duplicar el reporte actual
               if [ "$RUN_NUM" != "${{ github.run_number }}" ]; then
-                cat >> gh-pages-temp/index.html << EOF
+                # Intentar leer metadata del reporte
+                METADATA_FILE="$report_dir/metadata.json"
+                if [ -f "$METADATA_FILE" ]; then
+                  # Extraer información del metadata
+                  TAG=$(grep -oP '"tag":\s*"\K[^"]+' "$METADATA_FILE" 2>/dev/null || echo "N/A")
+                  AMBIENTE=$(grep -oP '"ambiente":\s*"\K[^"]+' "$METADATA_FILE" 2>/dev/null || echo "N/A")
+                  FECHA=$(grep -oP '"fecha":\s*"\K[^"]+' "$METADATA_FILE" 2>/dev/null || echo "N/A")
+                  
+                  cat >> gh-pages-temp/index.html << EOF
+              <li class="report-item">
+                <a class="report-link" href="$report_dir/karate-summary.html">
+                  📄 Reporte #$RUN_NUM - Tag: $TAG
+                </a>
+                <div class="report-date">Ambiente: $AMBIENTE | Fecha: $FECHA</div>
+              </li>
+          EOF
+                else
+                  # Si no existe metadata, mostrar info básica
+                  cat >> gh-pages-temp/index.html << EOF
               <li class="report-item">
                 <a class="report-link" href="$report_dir/karate-summary.html">
                   📄 Reporte #$RUN_NUM
                 </a>
-                <div class="report-date">Reporte histórico</div>
+                <div class="report-date">Reporte histórico (sin metadata)</div>
               </li>
           EOF
+                fi
               fi
             done
           fi
