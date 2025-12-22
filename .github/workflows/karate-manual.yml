@@ -503,23 +503,109 @@ jobs:
             done
           fi
           
-          # Cerrar HTML con JavaScript
+          # Cerrar HTML con JavaScript mejorado
           cat >> gh-pages-temp/index.html << 'EOF'
               </ul>
+            </div>
+            
+            <!-- Modal de confirmación -->
+            <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+              <div style="background:white; padding:30px; border-radius:8px; max-width:500px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                <h3 style="color:#1a73e8; margin-top:0;">🚀 Confirmar Ejecución</h3>
+                <p style="font-size:16px; color:#333; line-height:1.6;">
+                  Las pruebas se ejecutarán en segundo plano y recibirás una notificación en tu correo <strong id="modalEmail"></strong> cuando finalicen.
+                </p>
+                <p style="font-size:14px; color:#666; margin-top:10px;">
+                  Tag: <strong id="modalTag"></strong> | Ambiente: <strong id="modalAmbiente"></strong>
+                </p>
+                <div style="margin-top:25px; display:flex; gap:10px; justify-content:center;">
+                  <button onclick="cancelExecution()" style="background:#666; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-size:14px;">
+                    Cancelar
+                  </button>
+                  <button onclick="confirmExecution()" style="background:#1a73e8; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:bold;">
+                    ✓ Confirmar y Ejecutar
+                  </button>
+                </div>
+              </div>
             </div>
             
             <script>
               const form = document.getElementById('executionForm');
               const btnExecute = document.getElementById('btnExecute');
               const message = document.getElementById('message');
+              const confirmModal = document.getElementById('confirmModal');
+              let formData = {};
               
-              form.addEventListener('submit', async (e) => {
-                e.preventDefault();
+              // Validación de campos
+              function validateForm() {
+                const token = document.getElementById('githubToken').value.trim();
+                const tag = document.getElementById('tag').value.trim();
+                const correo = document.getElementById('correo').value.trim();
                 
-                const token = document.getElementById('githubToken').value;
-                const tag = document.getElementById('tag').value;
-                const ambiente = document.getElementById('ambiente').value;
-                const correo = document.getElementById('correo').value;
+                // Validar token
+                if (!token) {
+                  showError('⚠️ Por favor ingresa tu GitHub Token');
+                  return false;
+                }
+                
+                if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+                  showError('⚠️ El token debe comenzar con "ghp_" o "github_pat_"');
+                  return false;
+                }
+                
+                if (token.length < 40) {
+                  showError('⚠️ El token parece ser demasiado corto. Verifica que sea correcto.');
+                  return false;
+                }
+                
+                // Validar tag
+                if (!tag) {
+                  showError('⚠️ Por favor ingresa un tag para ejecutar');
+                  return false;
+                }
+                
+                if (!tag.startsWith('@')) {
+                  showError('⚠️ El tag debe comenzar con @ (ejemplo: @postLoginRolDirectivo)');
+                  return false;
+                }
+                
+                // Validar correo
+                if (!correo) {
+                  showError('⚠️ Por favor ingresa un correo electrónico');
+                  return false;
+                }
+                
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(correo)) {
+                  showError('⚠️ Por favor ingresa un correo electrónico válido');
+                  return false;
+                }
+                
+                return true;
+              }
+              
+              function showError(msg) {
+                message.className = 'message error show';
+                message.textContent = msg;
+                setTimeout(() => {
+                  message.className = 'message';
+                }, 5000);
+              }
+              
+              function showConfirmModal() {
+                document.getElementById('modalEmail').textContent = formData.correo;
+                document.getElementById('modalTag').textContent = formData.tag;
+                document.getElementById('modalAmbiente').textContent = formData.ambiente;
+                confirmModal.style.display = 'flex';
+              }
+              
+              function cancelExecution() {
+                confirmModal.style.display = 'none';
+                formData = {};
+              }
+              
+              async function confirmExecution() {
+                confirmModal.style.display = 'none';
                 
                 // Deshabilitar botón y mostrar loading
                 btnExecute.disabled = true;
@@ -532,15 +618,15 @@ jobs:
                     method: 'POST',
                     headers: {
                       'Accept': 'application/vnd.github.v3+json',
-                      'Authorization': 'token ' + token,
+                      'Authorization': 'token ' + formData.token,
                       'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                       ref: 'main',
                       inputs: {
-                        tag: tag,
-                        ambiente: ambiente,
-                        correo: correo
+                        tag: formData.tag,
+                        ambiente: formData.ambiente,
+                        correo: formData.correo
                       }
                     })
                   });
@@ -565,7 +651,28 @@ jobs:
                 } finally {
                   btnExecute.disabled = false;
                   btnExecute.textContent = '▶️ Ejecutar Pruebas';
+                  formData = {};
                 }
+              }
+              
+              form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Validar formulario
+                if (!validateForm()) {
+                  return;
+                }
+                
+                // Guardar datos del formulario
+                formData = {
+                  token: document.getElementById('githubToken').value.trim(),
+                  tag: document.getElementById('tag').value.trim(),
+                  ambiente: document.getElementById('ambiente').value,
+                  correo: document.getElementById('correo').value.trim()
+                };
+                
+                // Mostrar modal de confirmación
+                showConfirmModal();
               });
             </script>
           </body>
