@@ -1,4 +1,4 @@
-@postLoginRolPersonalAdministrativo @login
+@postLoginRolPersonalAdministrativo @login @dailyTests
 Feature: Login de usuario personal administrativo - Pruebas de Contrato API
 
 Background:

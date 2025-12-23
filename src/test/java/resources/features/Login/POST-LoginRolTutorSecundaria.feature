@@ -1,4 +1,4 @@
-@postLoginRolTutorSecundaria @login
+@postLoginRolTutorSecundaria @login @dailyTests
 Feature: Login de usuario tutor secundaria - Pruebas de Contrato API
 
 Background:

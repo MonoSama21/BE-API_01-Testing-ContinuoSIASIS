@@ -1,5 +1,5 @@
-@misDatos @dailyTests
-Feature: Retorna los datos personal del rol Personal Administrativo - Pruebas de Contrato API
+@putMisDatosPersonalAdministrativo @dailyTests
+Feature: Actualizar datos del rol Personal Administrativo - Pruebas de Contrato API
 
 Background:
     * url urlBase
@@ -7,9 +7,15 @@ Background:
     * def result = call read('classpath:resources/features/Login/POST-LoginRolPersonalAdministrativo.feature@tokenPersonalAdministrativo')
     * def personalAdministrativoToken = result.token 
 
-    @adminp
-Scenario: Validar que el servicio GET Mis Datos Personal Administrativo responde correctamente
+    @administrativo
+Scenario: Validar que el servicio de actualizar Mis Datos por el rol Personal Administrativo responde correctamente
     Given path "/api/mis-datos"
     And header Authorization = 'Bearer ' + personalAdministrativoToken
-    When method GET
+    And request 
+    """
+    {
+        "Celular": "989728164"
+    }
+    """
+    When method PUT
     Then status 200

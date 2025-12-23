@@ -1,4 +1,4 @@
-@postLoginRolDirectivo @login
+@postLoginRolDirectivo @login @dailyTests
 Feature: Login de usuario directivo - Pruebas de Contrato API
 
 Background:
