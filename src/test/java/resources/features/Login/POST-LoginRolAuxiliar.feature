@@ -1,4 +1,4 @@
-@postLoginRolAuxiliar @login
+@postLoginRolAuxiliar @login @dailyTests
 Feature: Login de usuario auxiliar - Pruebas de Contrato API
 
 Background:

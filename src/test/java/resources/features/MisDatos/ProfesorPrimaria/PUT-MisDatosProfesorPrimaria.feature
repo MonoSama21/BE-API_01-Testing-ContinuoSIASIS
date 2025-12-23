@@ -1,5 +1,5 @@
-@misDatos @dailyTests
-Feature: Retorna los datos personal del rol Profesor Primaria - Pruebas de Contrato API
+@putMisDatosProfesorPrimaria @dailyTests
+Feature: Actualizar datos del rol Profesor Primaria - Pruebas de Contrato API
 
 Background:
     * url urlBase
@@ -8,8 +8,15 @@ Background:
     * def profesorPrimariaToken = result.token 
 
     @profprimaria
-Scenario: Validar que el servicio GET Mis Datos Profesor Primaria responde correctamente
+Scenario: Validar que el servicio de actualizar Mis Datos por el rol Profesor Primaria responde correctamente
     Given path "/api/mis-datos"
     And header Authorization = 'Bearer ' + profesorPrimariaToken
-    When method GET
+    And request 
+    """
+    {
+        "Celular": "989729444",
+        "Correo_Electronico": "maria.sanchez@educacion.com"
+    }
+    """
+    When method PUT
     Then status 200

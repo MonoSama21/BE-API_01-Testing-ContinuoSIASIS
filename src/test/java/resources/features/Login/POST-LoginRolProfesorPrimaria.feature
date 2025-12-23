@@ -1,4 +1,4 @@
-@postLoginRolProfesorPrimaria @login
+@postLoginRolProfesorPrimaria @login @dailyTests
 Feature: Login de usuario profesor primaria - Pruebas de Contrato API
 
 Background:
