@@ -380,83 +380,330 @@ jobs:
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Reportes Karate - Historial</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-              h1, h2 { color: #1a73e8; }
-              .container { max-width: 1200px; margin: 0 auto; }
-              .stats, .executor-panel { 
-                background: white; 
-                padding: 20px; 
-                border-radius: 5px; 
-                margin-bottom: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
               }
-              .executor-panel { background: #e8f5e9; border-left: 4px solid #34a853; }
-              .form-group { margin-bottom: 15px; }
+              .container { 
+                max-width: 1200px; 
+                margin: 0 auto; 
+                animation: fadeIn 0.6s ease-in;
+              }
+              @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              h1 { 
+                color: #ffffff; 
+                font-size: 2.5rem; 
+                margin-bottom: 30px; 
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                text-align: center;
+              }
+              h2 { 
+                color: #2d3748; 
+                font-size: 1.5rem; 
+                margin-bottom: 20px;
+              }
+              .stats, .executor-panel { 
+                background: rgba(255, 255, 255, 0.95); 
+                backdrop-filter: blur(10px);
+                padding: 30px; 
+                border-radius: 15px; 
+                margin-bottom: 25px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+              }
+              .stats:hover, .executor-panel:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+              }
+              .executor-panel { 
+                background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                border-left: 5px solid #34a853;
+              }
+              .form-group { margin-bottom: 20px; }
               .form-group label { 
                 display: block; 
-                margin-bottom: 5px; 
-                font-weight: bold; 
-                color: #333;
+                margin-bottom: 8px; 
+                font-weight: 600; 
+                color: #2d3748;
+                font-size: 0.95rem;
               }
               .form-group input, .form-group select { 
                 width: 100%; 
-                padding: 10px; 
-                border: 1px solid #ddd; 
-                border-radius: 4px; 
+                padding: 12px 15px; 
+                border: 2px solid #e2e8f0; 
+                border-radius: 8px; 
                 font-size: 14px;
-                box-sizing: border-box;
+                transition: all 0.3s ease;
+                background: white;
               }
               .form-group input:focus, .form-group select:focus {
                 outline: none;
-                border-color: #1a73e8;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                transform: translateY(-2px);
               }
               .btn-execute { 
-                background: #1a73e8; 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white; 
-                padding: 12px 24px; 
+                padding: 15px 30px; 
                 border: none; 
-                border-radius: 4px; 
+                border-radius: 8px; 
                 cursor: pointer; 
                 font-size: 16px;
-                font-weight: bold;
+                font-weight: 700;
                 width: 100%;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
               }
-              .btn-execute:hover { background: #1557b0; }
-              .btn-execute:disabled { background: #ccc; cursor: not-allowed; }
+              .btn-execute:hover { 
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+              }
+              .btn-execute:active { transform: translateY(0); }
+              .btn-execute:disabled { 
+                background: #cbd5e0; 
+                cursor: not-allowed;
+                box-shadow: none;
+              }
               .message { 
-                padding: 12px; 
-                border-radius: 4px; 
-                margin-top: 15px; 
+                padding: 15px 20px; 
+                border-radius: 8px; 
+                margin-top: 20px; 
                 display: none;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
               }
-              .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-              .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+              @keyframes slideIn {
+                from { opacity: 0; transform: translateX(-20px); }
+                to { opacity: 1; transform: translateX(0); }
+              }
+              .message.success { 
+                background: #d4edda; 
+                color: #155724; 
+                border-left: 4px solid #28a745;
+              }
+              .message.error { 
+                background: #f8d7da; 
+                color: #721c24; 
+                border-left: 4px solid #dc3545;
+              }
               .message.show { display: block; }
               .report-list { list-style: none; padding: 0; }
               .report-item { 
-                background: white; 
-                padding: 15px; 
-                margin: 10px 0; 
-                border-radius: 5px; 
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                background: rgba(255, 255, 255, 0.95); 
+                padding: 20px; 
+                margin: 15px 0; 
+                border-radius: 12px; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                border-left: 4px solid #667eea;
+              }
+              .report-item:hover {
+                transform: translateX(10px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
               }
               .report-link { 
-                color: #1a73e8; 
+                color: #667eea; 
                 text-decoration: none; 
-                font-size: 18px; 
-                font-weight: bold;
+                font-size: 1.1rem; 
+                font-weight: 700;
+                transition: color 0.3s ease;
               }
-              .report-link:hover { text-decoration: underline; }
-              .report-date { color: #666; font-size: 14px; margin-top: 5px; }
+              .report-link:hover { 
+                color: #764ba2;
+                text-decoration: underline;
+              }
+              .report-date { 
+                color: #718096; 
+                font-size: 0.9rem; 
+                margin-top: 8px;
+                font-weight: 500;
+              }
               .badge { 
                 display: inline-block; 
-                padding: 3px 8px; 
-                border-radius: 3px; 
-                font-size: 12px; 
+                padding: 4px 12px; 
+                border-radius: 20px; 
+                font-size: 0.75rem; 
                 margin-left: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
               }
-              .badge-new { background: #34a853; color: white; }
-              .info-text { color: #666; font-size: 13px; margin-top: 5px; }
+              .badge-new { 
+                background: linear-gradient(135deg, #34a853 0%, #2d9e47 100%);
+                color: white;
+                box-shadow: 0 2px 8px rgba(52, 168, 83, 0.4);
+              }
+              .info-text { 
+                color: #718096; 
+                font-size: 0.8rem; 
+                margin-top: 8px;
+                font-weight: 500;
+              }
+              .info-text a { color: #667eea; font-weight: 600; }
+              
+              /* Chatbot Styles */
+              #chatbot-container {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 1000;
+              }
+              #chatbot-button {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                transition: all 0.3s ease;
+                animation: pulse 2s infinite;
+              }
+              @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+              }
+              #chatbot-button:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 25px rgba(102, 126, 234, 0.8);
+              }
+              #chatbot-window {
+                display: none;
+                position: fixed;
+                bottom: 90px;
+                right: 20px;
+                width: 350px;
+                height: 500px;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                flex-direction: column;
+                overflow: hidden;
+                animation: slideUp 0.3s ease;
+              }
+              @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              #chatbot-window.active { display: flex; }
+              #chatbot-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                font-weight: 700;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              }
+              #chatbot-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: background 0.3s ease;
+              }
+              #chatbot-close:hover { background: rgba(255,255,255,0.2); }
+              #chatbot-messages {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px;
+                background: #f7fafc;
+              }
+              .chat-message {
+                margin-bottom: 15px;
+                animation: fadeIn 0.3s ease;
+              }
+              .chat-message.bot { text-align: left; }
+              .chat-message.user { text-align: right; }
+              .chat-bubble {
+                display: inline-block;
+                padding: 10px 15px;
+                border-radius: 15px;
+                max-width: 80%;
+                word-wrap: break-word;
+              }
+              .chat-bubble.bot {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-bottom-left-radius: 5px;
+              }
+              .chat-bubble.user {
+                background: #e2e8f0;
+                color: #2d3748;
+                border-bottom-right-radius: 5px;
+              }
+              #chatbot-input-container {
+                padding: 15px;
+                background: white;
+                border-top: 1px solid #e2e8f0;
+                display: flex;
+                gap: 10px;
+              }
+              #chatbot-input {
+                flex: 1;
+                padding: 10px 15px;
+                border: 2px solid #e2e8f0;
+                border-radius: 20px;
+                font-size: 14px;
+                outline: none;
+              }
+              #chatbot-input:focus { border-color: #667eea; }
+              #chatbot-send {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease;
+              }
+              #chatbot-send:hover { transform: scale(1.1); }
+              .quick-questions {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 10px;
+              }
+              .quick-question-btn {
+                background: white;
+                border: 2px solid #667eea;
+                color: #667eea;
+                padding: 8px 12px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 12px;
+                text-align: left;
+                transition: all 0.3s ease;
+                font-weight: 600;
+              }
+              .quick-question-btn:hover {
+                background: #667eea;
+                color: white;
+                transform: translateX(5px);
+              }
             </style>
           </head>
           <body>
@@ -740,6 +987,131 @@ jobs:
                 
                 // Mostrar modal de confirmación
                 showConfirmModal();
+              });
+            </script>
+            
+            <!-- Chatbot Assistant -->
+            <div id="chatbot-container">
+              <button id="chatbot-button" aria-label="Abrir asistente">💬</button>
+              <div id="chatbot-window">
+                <div id="chatbot-header">
+                  <span>🤖 Asistente QA</span>
+                  <button id="chatbot-close" aria-label="Cerrar">×</button>
+                </div>
+                <div id="chatbot-messages">
+                  <div class="chat-message bot">
+                    <div class="chat-bubble bot">
+                      ¡Hola! 👋 Soy tu asistente QA. ¿En qué puedo ayudarte hoy?
+                    </div>
+                  </div>
+                  <div class="quick-questions">
+                    <button class="quick-question-btn" data-question="¿Cómo ejecuto pruebas?">❓ ¿Cómo ejecuto pruebas?</button>
+                    <button class="quick-question-btn" data-question="¿Qué es un token PAT?">🔑 ¿Qué es un token PAT?</button>
+                    <button class="quick-question-btn" data-question="¿Qué tags puedo usar?">🏷️ ¿Qué tags puedo usar?</button>
+                    <button class="quick-question-btn" data-question="¿Cómo veo los reportes?">📊 ¿Cómo veo los reportes?</button>
+                  </div>
+                </div>
+                <div id="chatbot-input-container">
+                  <input type="text" id="chatbot-input" placeholder="Escribe tu pregunta...">
+                  <button id="chatbot-send" aria-label="Enviar">➤</button>
+                </div>
+              </div>
+            </div>
+            
+            <script>
+              // Chatbot functionality
+              const chatbotButton = document.getElementById('chatbot-button');
+              const chatbotWindow = document.getElementById('chatbot-window');
+              const chatbotClose = document.getElementById('chatbot-close');
+              const chatbotMessages = document.getElementById('chatbot-messages');
+              const chatbotInput = document.getElementById('chatbot-input');
+              const chatbotSend = document.getElementById('chatbot-send');
+              const quickQuestionBtns = document.querySelectorAll('.quick-question-btn');
+              
+              const responses = {
+                '¿cómo ejecuto pruebas?': '✅ Para ejecutar pruebas:\n1. Necesitas un GitHub Token (PAT) con permisos de workflow\n2. Ingresa el tag que deseas ejecutar (ej: @postLoginRolDirectivo)\n3. Selecciona el ambiente (QA o DEV)\n4. Ingresa tu correo para recibir notificaciones\n5. Haz clic en "Ejecutar Pruebas"',
+                '¿qué es un token pat?': '🔑 Un Personal Access Token (PAT) es una credencial de GitHub que permite ejecutar acciones automáticas. Para crear uno:\n1. Ve a GitHub Settings → Developer settings → Personal access tokens\n2. Genera un nuevo token con el permiso "workflow"\n3. Copia el token y úsalo en el formulario\n⚠️ Guárdalo en un lugar seguro, no se mostrará nuevamente',
+                '¿qué tags puedo usar?': '🏷️ Algunos tags disponibles:\n• @postLoginRolDirectivo - Login rol directivo\n• @postLoginRolAuxiliar - Login rol auxiliar\n• @security - Pruebas de seguridad\n• @smoke - Pruebas rápidas\n• @contract - Validaciones de contrato\n• @dailyTests - Pruebas diarias\n\nPuedes ver más tags en los archivos .feature del proyecto',
+                '¿cómo veo los reportes?': '📊 Para ver los reportes:\n1. En el historial de ejecuciones, haz clic en cualquier enlace de reporte\n2. Se abrirá el reporte completo de Karate con resultados detallados\n3. También recibirás los resultados por correo electrónico\n4. Los reportes se conservan durante 14 días',
+                'ayuda': '💡 Puedo ayudarte con:\n• Cómo ejecutar pruebas\n• Información sobre tokens PAT\n• Tags disponibles\n• Visualización de reportes\n• Diferencias entre ambientes QA y DEV\n\n¿Sobre qué tema necesitas ayuda?',
+                'qa': '🧪 QA es el ambiente de Quality Assurance donde se ejecutan las pruebas antes de producción. Es un entorno controlado para validar funcionalidades.',
+                'dev': '👨‍💻 DEV es el ambiente de desarrollo donde los desarrolladores prueban sus cambios antes de pasar a QA. Es más inestable que QA.',
+                'ambiente': '🌍 Tenemos dos ambientes:\n• DEV: Desarrollo, para pruebas tempranas\n• QA: Quality Assurance, para validación final\n\nSelecciona QA para pruebas estables.',
+                'correo': '📧 El correo de notificación es donde recibirás:\n• Confirmación de inicio de pruebas\n• Resultados detallados al finalizar\n• Enlaces directos a los reportes\n\nPuedes usar cualquier correo válido.',
+                'default': '🤔 No estoy seguro de cómo responder a eso. Intenta preguntar sobre:\n• Ejecución de pruebas\n• Tokens PAT\n• Tags disponibles\n• Reportes\n• Ambientes\n\nO escribe "ayuda" para ver todas las opciones.'
+              };
+              
+              chatbotButton.addEventListener('click', () => {
+                chatbotWindow.classList.toggle('active');
+                if (chatbotWindow.classList.contains('active')) {
+                  chatbotInput.focus();
+                }
+              });
+              
+              chatbotClose.addEventListener('click', () => {
+                chatbotWindow.classList.remove('active');
+              });
+              
+              function addMessage(text, isBot = true) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = \`chat-message \${isBot ? 'bot' : 'user'}\`;
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = \`chat-bubble \${isBot ? 'bot' : 'user'}\`;
+                bubbleDiv.textContent = text;
+                bubbleDiv.style.whiteSpace = 'pre-line';
+                
+                messageDiv.appendChild(bubbleDiv);
+                
+                const quickQuestions = chatbotMessages.querySelector('.quick-questions');
+                chatbotMessages.insertBefore(messageDiv, quickQuestions);
+                
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+              }
+              
+              function getBotResponse(userMessage) {
+                const normalized = userMessage.toLowerCase().trim();
+                
+                for (const [key, value] of Object.entries(responses)) {
+                  if (normalized.includes(key)) {
+                    return value;
+                  }
+                }
+                
+                return responses['default'];
+              }
+              
+              function handleUserMessage() {
+                const userMessage = chatbotInput.value.trim();
+                if (!userMessage) return;
+                
+                addMessage(userMessage, false);
+                chatbotInput.value = '';
+                
+                setTimeout(() => {
+                  const botResponse = getBotResponse(userMessage);
+                  addMessage(botResponse, true);
+                }, 500);
+              }
+              
+              chatbotSend.addEventListener('click', handleUserMessage);
+              
+              chatbotInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                  handleUserMessage();
+                }
+              });
+              
+              quickQuestionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                  const question = btn.dataset.question;
+                  addMessage(question, false);
+                  
+                  setTimeout(() => {
+                    const botResponse = getBotResponse(question);
+                    addMessage(botResponse, true);
+                  }, 500);
+                });
               });
             </script>
           </body>
