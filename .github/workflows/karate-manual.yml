@@ -371,84 +371,137 @@ jobs:
           # Generar fecha actual
           CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
           
-          # Crear HTML inicial usando echo para evitar límite de caracteres
-          echo "<!DOCTYPE html>" > gh-pages-temp/index.html
-          echo "<html lang=\"es\">" >> gh-pages-temp/index.html
-          echo "<head>" >> gh-pages-temp/index.html
-          echo "<meta charset=\"UTF-8\">" >> gh-pages-temp/index.html
-          echo "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" >> gh-pages-temp/index.html
-          echo "<title>Reportes Karate - Historial</title>" >> gh-pages-temp/index.html
-          echo "<style>" >> gh-pages-temp/index.html
-          echo "* { margin: 0; padding: 0; box-sizing: border-box; }" >> gh-pages-temp/index.html
-          echo "body { font-family: Arial, sans-serif; margin: 0; padding-top: 80px; background: #f5f5f5; }" >> gh-pages-temp/index.html
-          echo "h1, h2 { color: #1a73e8; }" >> gh-pages-temp/index.html
-          echo ".navbar { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; padding: 0; }" >> gh-pages-temp/index.html
-          echo ".navbar-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; }" >> gh-pages-temp/index.html
-          echo ".navbar-brand { display: flex; align-items: center; color: white; font-size: 24px; font-weight: bold; text-decoration: none; gap: 10px; }" >> gh-pages-temp/index.html
-          echo ".navbar-brand:hover { opacity: 0.9; }" >> gh-pages-temp/index.html
-          echo ".nav-links { display: flex; list-style: none; gap: 30px; align-items: center; }" >> gh-pages-temp/index.html
-          echo ".nav-item { color: white; text-decoration: none; font-size: 16px; font-weight: 500; padding: 8px 16px; border-radius: 6px; transition: all 0.3s ease; cursor: pointer; }" >> gh-pages-temp/index.html
-          echo ".nav-item:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }" >> gh-pages-temp/index.html
-          echo ".nav-item.active { background: rgba(255,255,255,0.25); }" >> gh-pages-temp/index.html
-          echo ".container { max-width: 1200px; margin: 0 auto; padding: 20px 40px; }" >> gh-pages-temp/index.html
-          echo ".stats, .executor-panel { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }" >> gh-pages-temp/index.html
-          echo ".executor-panel { background: #e8f5e9; border-left: 4px solid #34a853; }" >> gh-pages-temp/index.html
-          echo ".form-group { margin-bottom: 15px; }" >> gh-pages-temp/index.html
-          echo ".form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }" >> gh-pages-temp/index.html
-          echo ".form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; }" >> gh-pages-temp/index.html
-          echo ".form-group input:focus, .form-group select:focus { outline: none; border-color: #1a73e8; }" >> gh-pages-temp/index.html
-          echo ".btn-execute { background: #1a73e8; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }" >> gh-pages-temp/index.html
-          echo ".btn-execute:hover { background: #1557b0; }" >> gh-pages-temp/index.html
-          echo ".btn-execute:disabled { background: #ccc; cursor: not-allowed; }" >> gh-pages-temp/index.html
-          echo ".message { padding: 12px; border-radius: 4px; margin-top: 15px; display: none; }" >> gh-pages-temp/index.html
-          echo ".message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }" >> gh-pages-temp/index.html
-          echo ".message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }" >> gh-pages-temp/index.html
-          echo ".message.show { display: block; }" >> gh-pages-temp/index.html
-          echo ".report-list { list-style: none; padding: 0; }" >> gh-pages-temp/index.html
-          echo ".report-item { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }" >> gh-pages-temp/index.html
-          echo ".report-link { color: #1a73e8; text-decoration: none; font-size: 18px; font-weight: bold; }" >> gh-pages-temp/index.html
-          echo ".report-link:hover { text-decoration: underline; }" >> gh-pages-temp/index.html
-          echo ".report-date { color: #666; font-size: 14px; margin-top: 5px; }" >> gh-pages-temp/index.html
-          echo ".badge { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 12px; margin-left: 10px; }" >> gh-pages-temp/index.html
-          echo ".badge-new { background: #34a853; color: white; }" >> gh-pages-temp/index.html
-          echo ".info-text { color: #666; font-size: 13px; margin-top: 5px; }" >> gh-pages-temp/index.html
-          echo ".help-panel { background: #fff9e6; border-left: 4px solid #ff9800; margin-top: 20px; }" >> gh-pages-temp/index.html
-          echo ".help-header { color: #ff9800; margin-top: 0; }" >> gh-pages-temp/index.html
-          echo ".help-content { font-size: 14px; }" >> gh-pages-temp/index.html
-          echo ".help-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee; }" >> gh-pages-temp/index.html
-          echo ".help-section:last-child { border-bottom: none; }" >> gh-pages-temp/index.html
-          echo ".help-section h3 { color: #333; margin-bottom: 15px; }" >> gh-pages-temp/index.html
-          echo ".help-item { margin: 12px 0; padding-left: 15px; border-left: 3px solid #ddd; line-height: 1.6; }" >> gh-pages-temp/index.html
-          echo ".help-item strong { color: #1a73e8; }" >> gh-pages-temp/index.html
-          echo ".help-item code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; color: #d63384; }" >> gh-pages-temp/index.html
-          echo "html { scroll-behavior: smooth; }" >> gh-pages-temp/index.html
-          echo "section { scroll-margin-top: 100px; }" >> gh-pages-temp/index.html
-          echo "</style>" >> gh-pages-temp/index.html
-          echo "</head>" >> gh-pages-temp/index.html
-          echo "<body>" >> gh-pages-temp/index.html
-          
-          # Navbar
-          echo "<nav class=\"navbar\">" >> gh-pages-temp/index.html
-          echo "<div class=\"navbar-container\">" >> gh-pages-temp/index.html
-          echo "<a href=\"#\" class=\"navbar-brand\"><span>🧪</span><span>Karate Testing</span></a>" >> gh-pages-temp/index.html
-          echo "<ul class=\"nav-links\">" >> gh-pages-temp/index.html
-          echo "<li><a href=\"#ejecutar\" class=\"nav-item\">🚀 Ejecutar Pruebas</a></li>" >> gh-pages-temp/index.html
-          echo "<li><a href=\"#reportes\" class=\"nav-item\">📋 Reportes</a></li>" >> gh-pages-temp/index.html
-          echo "<li><a href=\"#guia\" class=\"nav-item\">📖 Guía de Uso</a></li>" >> gh-pages-temp/index.html
-          echo "</ul>" >> gh-pages-temp/index.html
-          echo "</div>" >> gh-pages-temp/index.html
-          echo "</nav>" >> gh-pages-temp/index.html
-          
-          # Contenedor principal
-          echo "<div class=\"container\">" >> gh-pages-temp/index.html
-          echo "<h1 style=\"margin-top: 20px;\">📊 Historial de Reportes Karate</h1>" >> gh-pages-temp/index.html
-          
-          # Sección ejecutar
-          cat >> gh-pages-temp/index.html << 'EOF'
+          # Crear HTML con historial completo
+          cat > gh-pages-temp/index.html << EOF
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reportes Karate - Historial</title>
+            <style>
+              html { scroll-behavior: smooth; }
+              body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+              h1, h2 { color: #1a73e8; }
+              .container { max-width: 1200px; margin: 0 auto; }
+              .stats, .executor-panel { 
+                background: white; 
+                padding: 20px; 
+                border-radius: 5px; 
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              .executor-panel { background: #e8f5e9; border-left: 4px solid #34a853; }
+              .form-group { margin-bottom: 15px; }
+              .form-group label { 
+                display: block; 
+                margin-bottom: 5px; 
+                font-weight: bold; 
+                color: #333;
+              }
+              .form-group input, .form-group select { 
+                width: 100%; 
+                padding: 10px; 
+                border: 1px solid #ddd; 
+                border-radius: 4px; 
+                font-size: 14px;
+                box-sizing: border-box;
+              }
+              .form-group input:focus, .form-group select:focus {
+                outline: none;
+                border-color: #1a73e8;
+              }
+              .btn-execute { 
+                background: #1a73e8; 
+                color: white; 
+                padding: 12px 24px; 
+                border: none; 
+                border-radius: 4px; 
+                cursor: pointer; 
+                font-size: 16px;
+                font-weight: bold;
+                width: 100%;
+              }
+              .btn-execute:hover { background: #1557b0; }
+              .btn-execute:disabled { background: #ccc; cursor: not-allowed; }
+              .message { 
+                padding: 12px; 
+                border-radius: 4px; 
+                margin-top: 15px; 
+                display: none;
+              }
+              .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+              .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+              .message.show { display: block; }
+              .report-list { list-style: none; padding: 0; }
+              .report-item { 
+                background: white; 
+                padding: 15px; 
+                margin: 10px 0; 
+                border-radius: 5px; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              .report-link { 
+                color: #1a73e8; 
+                text-decoration: none; 
+                font-size: 18px; 
+                font-weight: bold;
+              }
+              .report-link:hover { text-decoration: underline; }
+              .report-date { color: #666; font-size: 14px; margin-top: 5px; }
+              .badge { 
+                display: inline-block; 
+                padding: 3px 8px; 
+                border-radius: 3px; 
+                font-size: 12px; 
+                margin-left: 10px;
+              }
+              .badge-new { background: #34a853; color: white; }
+              .info-text { color: #666; font-size: 13px; margin-top: 5px; }
+              .help-panel { background: #fff9e6; border-left: 4px solid #ff9800; margin-top: 20px; }
+              .help-header { color: #ff9800; margin-top: 0; }
+              .help-content { font-size: 14px; }
+              .help-section { 
+                margin-bottom: 25px; 
+                padding-bottom: 20px; 
+                border-bottom: 1px solid #eee;
+              }
+              .help-section:last-child { border-bottom: none; }
+              .help-section h3 { color: #333; margin-bottom: 15px; }
+              .help-item { 
+                margin: 12px 0; 
+                padding-left: 15px; 
+                border-left: 3px solid #ddd;
+                line-height: 1.6;
+              }
+              .help-item strong { color: #1a73e8; }
+              .help-item code { 
+                background: #f5f5f5; 
+                padding: 2px 6px; 
+                border-radius: 3px; 
+                font-family: monospace;
+                color: #d63384;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <!-- Barra de navegación -->
+              <div class="stats" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); margin-bottom: 30px;">
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; width: 100%;">
+                  <h2 style="color: white; margin: 0; font-size: 20px;">🎯 Testing Dashboard</h2>
+                  <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap;">
+                    <a href="#ejecutar" class="badge badge-new" style="text-decoration: none; padding: 8px 16px; font-size: 14px; cursor: pointer;">🚀 Ejecutar Pruebas</a>
+                    <a href="#historial" class="badge" style="background: white; color: #1a73e8; text-decoration: none; padding: 8px 16px; font-size: 14px; cursor: pointer;">📋 Historial</a>
+                    <a href="#ayuda" class="badge" style="background: #ff9800; color: white; text-decoration: none; padding: 8px 16px; font-size: 14px; cursor: pointer;">📖 Ayuda</a>
+                  </div>
+                </div>
+              </div>
+              
+              <h1>📊 Historial de Reportes Karate</h1>
               
               <!-- Panel de ejecución -->
-              <section id="ejecutar">
-              <div class="executor-panel">
+              <div id="ejecutar" class="executor-panel">
                 <h2>🚀 Ejecutar Nuevas Pruebas</h2>
                 <form id="executionForm">
                   <div class="form-group">
@@ -483,7 +536,6 @@ jobs:
                   <div id="message" class="message"></div>
                 </form>
               </div>
-              </section>
               
               <div class="stats">
                 <p><strong>Último reporte generado:</strong> Run #${{ github.run_number }}</p>
@@ -492,9 +544,8 @@ jobs:
                 <p><strong>Fecha:</strong> ${CURRENT_DATE}</p>
               </div>
               
-              <section id="reportes">
               <h2>📋 Historial de Ejecuciones</h2>
-              <ul class="report-list">
+              <ul id="historial" class="report-list">
           EOF
           
           # Agregar reporte actual primero
@@ -559,13 +610,11 @@ jobs:
           # Cerrar HTML con JavaScript mejorado
           cat >> gh-pages-temp/index.html << 'EOF'
               </ul>
-              </section>
             </div>
           EOF
           
           # Agregar sección de ayuda usando echo para evitar límite de caracteres
-          echo "            <section id=\"guia\">" >> gh-pages-temp/index.html
-          echo "            <div class=\"card help-panel\">" >> gh-pages-temp/index.html
+          echo "            <div id=\"ayuda\" class=\"card help-panel\">" >> gh-pages-temp/index.html
           echo "              <h2 class=\"help-header\">📖 Guía de Uso de la Plataforma</h2>" >> gh-pages-temp/index.html
           echo "              <div class=\"help-content\">" >> gh-pages-temp/index.html
           
@@ -599,8 +648,6 @@ jobs:
           
           echo "              </div>" >> gh-pages-temp/index.html
           echo "            </div>" >> gh-pages-temp/index.html
-          echo "            </section>" >> gh-pages-temp/index.html
-          echo "          </div>" >> gh-pages-temp/index.html
           
           cat >> gh-pages-temp/index.html << 'EOF'
             
@@ -631,49 +678,6 @@ jobs:
               const message = document.getElementById('message');
               const confirmModal = document.getElementById('confirmModal');
               let formData = {};
-              
-              // Navegación suave y resaltado del enlace activo
-              document.querySelectorAll('.nav-item').forEach(link => {
-                link.addEventListener('click', function(e) {
-                  e.preventDefault();
-                  
-                  // Remover clase activa de todos los enlaces
-                  document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                  });
-                  
-                  // Agregar clase activa al enlace clickeado
-                  this.classList.add('active');
-                  
-                  // Navegar suavemente a la sección
-                  const targetId = this.getAttribute('href').substring(1);
-                  const targetSection = document.getElementById(targetId);
-                  if (targetSection) {
-                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                });
-              });
-              
-              // Detectar sección visible al hacer scroll
-              window.addEventListener('scroll', function() {
-                const sections = document.querySelectorAll('section[id]');
-                let current = '';
-                
-                sections.forEach(section => {
-                  const sectionTop = section.offsetTop;
-                  const sectionHeight = section.clientHeight;
-                  if (pageYOffset >= sectionTop - 120) {
-                    current = section.getAttribute('id');
-                  }
-                });
-                
-                document.querySelectorAll('.nav-item').forEach(link => {
-                  link.classList.remove('active');
-                  if (link.getAttribute('href') === '#' + current) {
-                    link.classList.add('active');
-                  }
-                });
-              });
               
               // Validación de campos
               function validateForm() {
