@@ -1,0 +1,52 @@
+{
+  "200": {
+    "success": "#boolean",
+    "data": {
+      "Id_Directivo": "##string",
+      "Id_Auxiliar": "##string",
+      "Id_Personal_Administrativo": "##string",
+      "Id_Profesor_Primaria": "##string",
+      "Id_Profesor_Secundaria": "##string",
+      "Id_Tutor_Secundaria": "##string",
+      "Nombres": "#string",
+      "Apellidos": "#string",
+      "Genero": "#string",
+      "Identificador_Nacional": "##string",
+      "Nombre_Usuario": "#string",
+      "Estado": "##boolean",
+      "Correo_Electronico": "#string",
+      "Celular": "##string",
+      "Google_Drive_Foto_ID": "##string"
+    }
+  },
+  "400": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "401": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "403": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "404": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  },
+  "500": {
+    "success": "#boolean",
+    "message": "#string",
+    "errorType": "#string",
+    "details": "##object"
+  }
+}

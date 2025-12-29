@@ -1,4 +1,4 @@
-@misDatos
+@misDatos @dailyTests
 Feature: Retorna los datos personal del rol Tutor Secundaria - Pruebas de Contrato API
 
 Background:
