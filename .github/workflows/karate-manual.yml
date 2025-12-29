@@ -1,4 +1,4 @@
-name: 🚀 Karate API Tests - Manual & Scheduled
+name: Karate API Tests - Manual & Scheduled
 
 on:
   workflow_dispatch:
