@@ -378,147 +378,619 @@ jobs:
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Reportes Karate - Historial</title>
+            <title>Reportes Karate - Testing Continuo</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <style>
-              body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-              h1, h2 { color: #1a73e8; }
-              .container { max-width: 1200px; margin: 0 auto; }
-              .stats, .executor-panel { 
-                background: white; 
-                padding: 20px; 
-                border-radius: 5px; 
-                margin-bottom: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              
+              body { 
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
               }
-              .executor-panel { background: #e8f5e9; border-left: 4px solid #34a853; }
-              .form-group { margin-bottom: 15px; }
+              
+              .container { 
+                max-width: 1400px; 
+                margin: 0 auto;
+                animation: fadeIn 0.5s ease-in;
+              }
+              
+              @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              
+              /* Header mejorado */
+              .header {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                margin-bottom: 30px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+              }
+              
+              .header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: pulse 4s ease-in-out infinite;
+              }
+              
+              @keyframes pulse {
+                0%, 100% { transform: scale(1); opacity: 0.5; }
+                50% { transform: scale(1.1); opacity: 0.8; }
+              }
+              
+              .header h1 {
+                color: white;
+                font-size: 42px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                position: relative;
+                z-index: 1;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+              }
+              
+              .header p {
+                color: rgba(255,255,255,0.9);
+                font-size: 18px;
+                position: relative;
+                z-index: 1;
+              }
+              
+              /* Stats cards */
+              .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+              }
+              
+              .stat-card {
+                background: white;
+                padding: 25px;
+                border-radius: 15px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                position: relative;
+                overflow: hidden;
+              }
+              
+              .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+              }
+              
+              .stat-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 5px;
+                height: 100%;
+                background: linear-gradient(180deg, #1a73e8, #34a853);
+              }
+              
+              .stat-card .icon {
+                font-size: 32px;
+                margin-bottom: 10px;
+              }
+              
+              .stat-card h3 {
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              }
+              
+              .stat-card .value {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1a73e8;
+              }
+              
+              /* Executor panel mejorado */
+              .executor-panel {
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                padding: 35px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                margin-bottom: 30px;
+                border: 2px solid #e8f5e9;
+              }
+              
+              .executor-panel h2 {
+                color: #1a73e8;
+                font-size: 28px;
+                margin-bottom: 25px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              
+              .form-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 25px;
+              }
+              
+              .form-group { 
+                margin-bottom: 0;
+              }
+              
               .form-group label { 
                 display: block; 
-                margin-bottom: 5px; 
-                font-weight: bold; 
+                margin-bottom: 8px; 
+                font-weight: 600; 
                 color: #333;
-              }
-              .form-group input, .form-group select { 
-                width: 100%; 
-                padding: 10px; 
-                border: 1px solid #ddd; 
-                border-radius: 4px; 
                 font-size: 14px;
-                box-sizing: border-box;
               }
-              .form-group input:focus, .form-group select:focus {
+              
+              .form-group input, 
+              .form-group select { 
+                width: 100%; 
+                padding: 12px 16px; 
+                border: 2px solid #e0e0e0; 
+                border-radius: 10px; 
+                font-size: 14px;
+                transition: all 0.3s ease;
+                background: white;
+              }
+              
+              .form-group input:focus, 
+              .form-group select:focus {
                 outline: none;
                 border-color: #1a73e8;
+                box-shadow: 0 0 0 4px rgba(26,115,232,0.1);
               }
+              
               .btn-execute { 
-                background: #1a73e8; 
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
                 color: white; 
-                padding: 12px 24px; 
+                padding: 16px 32px; 
                 border: none; 
-                border-radius: 4px; 
+                border-radius: 12px; 
                 cursor: pointer; 
                 font-size: 16px;
-                font-weight: bold;
+                font-weight: 700;
                 width: 100%;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(26,115,232,0.3);
+                text-transform: uppercase;
+                letter-spacing: 1px;
               }
-              .btn-execute:hover { background: #1557b0; }
-              .btn-execute:disabled { background: #ccc; cursor: not-allowed; }
+              
+              .btn-execute:hover { 
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(26,115,232,0.4);
+              }
+              
+              .btn-execute:disabled { 
+                background: #ccc; 
+                cursor: not-allowed;
+                transform: none;
+              }
+              
               .message { 
-                padding: 12px; 
-                border-radius: 4px; 
-                margin-top: 15px; 
+                padding: 15px 20px; 
+                border-radius: 10px; 
+                margin-top: 20px; 
                 display: none;
+                animation: slideIn 0.3s ease;
               }
-              .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-              .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+              
+              @keyframes slideIn {
+                from { opacity: 0; transform: translateX(-20px); }
+                to { opacity: 1; transform: translateX(0); }
+              }
+              
+              .message.success { 
+                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                color: #155724; 
+                border-left: 4px solid #28a745;
+              }
+              
+              .message.error { 
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                color: #721c24; 
+                border-left: 4px solid #dc3545;
+              }
+              
               .message.show { display: block; }
-              .report-list { list-style: none; padding: 0; }
-              .report-item { 
-                background: white; 
-                padding: 15px; 
-                margin: 10px 0; 
-                border-radius: 5px; 
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              
+              /* Reports section */
+              .reports-section {
+                background: white;
+                padding: 35px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
               }
+              
+              .reports-section h2 {
+                color: #1a73e8;
+                font-size: 28px;
+                margin-bottom: 25px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              
+              .report-list { 
+                list-style: none; 
+                padding: 0; 
+              }
+              
+              .report-item { 
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                padding: 20px; 
+                margin: 15px 0; 
+                border-radius: 12px; 
+                box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+                transition: all 0.3s ease;
+                border-left: 4px solid #1a73e8;
+              }
+              
+              .report-item:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+              }
+              
               .report-link { 
                 color: #1a73e8; 
                 text-decoration: none; 
                 font-size: 18px; 
-                font-weight: bold;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
               }
-              .report-link:hover { text-decoration: underline; }
-              .report-date { color: #666; font-size: 14px; margin-top: 5px; }
+              
+              .report-link:hover { 
+                color: #0d47a1;
+              }
+              
+              .report-date { 
+                color: #666; 
+                font-size: 14px; 
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+              }
+              
               .badge { 
                 display: inline-block; 
-                padding: 3px 8px; 
-                border-radius: 3px; 
-                font-size: 12px; 
-                margin-left: 10px;
+                padding: 4px 12px; 
+                border-radius: 20px; 
+                font-size: 11px; 
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
               }
-              .badge-new { background: #34a853; color: white; }
-              .info-text { color: #666; font-size: 13px; margin-top: 5px; }
+              
+              .badge-new { 
+                background: linear-gradient(135deg, #34a853 0%, #1e8e3e 100%);
+                color: white;
+                animation: pulse-badge 2s ease-in-out infinite;
+              }
+              
+              @keyframes pulse-badge {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+              }
+              
+              .info-text { 
+                color: #666; 
+                font-size: 13px; 
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+              }
+              
+              /* Chatbot styles */
+              .chatbot-container {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                z-index: 1000;
+              }
+              
+              .chatbot-button {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                color: white;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 5px 20px rgba(26,115,232,0.4);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                transition: all 0.3s ease;
+                animation: float 3s ease-in-out infinite;
+              }
+              
+              @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+              }
+              
+              .chatbot-button:hover {
+                transform: scale(1.1);
+                box-shadow: 0 8px 30px rgba(26,115,232,0.6);
+              }
+              
+              .chatbot-window {
+                position: absolute;
+                bottom: 80px;
+                right: 0;
+                width: 350px;
+                height: 500px;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                display: none;
+                flex-direction: column;
+                overflow: hidden;
+                animation: slideUp 0.3s ease;
+              }
+              
+              @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              
+              .chatbot-window.active {
+                display: flex;
+              }
+              
+              .chatbot-header {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                color: white;
+                padding: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              }
+              
+              .chatbot-header h3 {
+                font-size: 18px;
+                font-weight: 600;
+              }
+              
+              .chatbot-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+              }
+              
+              .chatbot-close:hover {
+                transform: rotate(90deg);
+              }
+              
+              .chatbot-messages {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                background: #f8f9fa;
+              }
+              
+              .chatbot-message {
+                margin-bottom: 15px;
+                animation: messageIn 0.3s ease;
+              }
+              
+              @keyframes messageIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              
+              .chatbot-message.bot {
+                text-align: left;
+              }
+              
+              .chatbot-message.user {
+                text-align: right;
+              }
+              
+              .message-bubble {
+                display: inline-block;
+                padding: 12px 18px;
+                border-radius: 18px;
+                max-width: 80%;
+                word-wrap: break-word;
+              }
+              
+              .chatbot-message.bot .message-bubble {
+                background: white;
+                color: #333;
+                border-bottom-left-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+              }
+              
+              .chatbot-message.user .message-bubble {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                color: white;
+                border-bottom-right-radius: 5px;
+              }
+              
+              .chatbot-quick-questions {
+                padding: 15px;
+                background: white;
+                border-top: 1px solid #e0e0e0;
+              }
+              
+              .quick-question-btn {
+                display: block;
+                width: 100%;
+                padding: 10px;
+                margin: 5px 0;
+                background: #f0f2f5;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                text-align: left;
+                font-size: 13px;
+                transition: all 0.2s ease;
+              }
+              
+              .quick-question-btn:hover {
+                background: #e4e6eb;
+                transform: translateX(5px);
+              }
+              
+              .chatbot-input-area {
+                padding: 15px;
+                background: white;
+                border-top: 1px solid #e0e0e0;
+                display: flex;
+                gap: 10px;
+              }
+              
+              .chatbot-input {
+                flex: 1;
+                padding: 10px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 20px;
+                font-size: 14px;
+                outline: none;
+              }
+              
+              .chatbot-input:focus {
+                border-color: #1a73e8;
+              }
+              
+              .chatbot-send {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                color: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+              }
+              
+              .chatbot-send:hover {
+                transform: scale(1.1);
+              }
+              
+              /* Responsive */
+              @media (max-width: 768px) {
+                .header h1 { font-size: 28px; }
+                .stats-grid { grid-template-columns: 1fr; }
+                .form-grid { grid-template-columns: 1fr; }
+                .chatbot-window { width: 300px; }
+              }
             </style>
           </head>
           <body>
             <div class="container">
-              <h1>📊 Historial de Reportes Karate</h1>
+              <!-- Header -->
+              <div class="header">
+                <h1><i class="fas fa-vial"></i> Testing Continuo - Karate API</h1>
+                <p>Sistema automatizado de pruebas de calidad</p>
+              </div>
               
-              <!-- Panel de ejecución -->
+              <!-- Stats Grid -->
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="icon">🚀</div>
+                  <h3>Último Reporte</h3>
+                  <div class="value">#${{ github.run_number }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="icon">🏷️</div>
+                  <h3>Tag Ejecutado</h3>
+                  <div class="value" style="font-size: 18px;">${{ steps.setup.outputs.tag }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="icon">🌍</div>
+                  <h3>Ambiente</h3>
+                  <div class="value">${{ steps.setup.outputs.ambiente }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="icon">📅</div>
+                  <h3>Última Ejecución</h3>
+                  <div class="value" style="font-size: 14px;">${CURRENT_DATE}</div>
+                </div>
+              </div>
+              
+              <!-- Executor Panel -->
               <div class="executor-panel">
-                <h2>🚀 Ejecutar Nuevas Pruebas</h2>
+                <h2><i class="fas fa-rocket"></i> Ejecutar Nuevas Pruebas</h2>
                 <form id="executionForm">
-                  <div class="form-group">
-                    <label for="githubToken">GitHub Token (PAT)</label>
-                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
-                    <p class="info-text">Necesitas un Personal Access Token con permiso 'workflow'. <a href="https://github.com/settings/tokens/new?scopes=workflow" target="_blank">Crear token</a></p>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="tag">Tag a ejecutar</label>
-                    <input type="text" id="tag" placeholder="@postLoginRolDirectivo" required>
-                    <p class="info-text">Ejemplo: @postLoginRolDirectivo, @security, @smoke</p>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="ambiente">Ambiente</label>
-                    <select id="ambiente" required>
-                      <option value="QA" selected>QA</option>
-                      <option value="DEV">DEV</option>
-                    </select>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="correo">Correo de notificación</label>
-                    <input type="email" id="correo" placeholder="tu-correo@ejemplo.com" value="2101010261@undc.edu.pe" required>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="githubToken"><i class="fas fa-key"></i> GitHub Token (PAT)</label>
+                      <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
+                      <p class="info-text"><i class="fas fa-info-circle"></i> Necesitas un PAT con permiso 'workflow'. <a href="https://github.com/settings/tokens/new?scopes=workflow" target="_blank">Crear token</a></p>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="tag"><i class="fas fa-tag"></i> Tag a ejecutar</label>
+                      <input type="text" id="tag" placeholder="@postLoginRolDirectivo" required>
+                      <p class="info-text"><i class="fas fa-lightbulb"></i> Ejemplo: @login, @security, @smoke</p>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="ambiente"><i class="fas fa-globe"></i> Ambiente</label>
+                      <select id="ambiente" required>
+                        <option value="QA" selected>QA</option>
+                        <option value="DEV">DEV</option>
+                      </select>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="correo"><i class="fas fa-envelope"></i> Correo de notificación</label>
+                      <input type="email" id="correo" placeholder="tu-correo@ejemplo.com" value="2101010261@undc.edu.pe" required>
+                    </div>
                   </div>
                   
                   <button type="submit" class="btn-execute" id="btnExecute">
-                    ▶️ Ejecutar Pruebas
+                    <i class="fas fa-play"></i> Ejecutar Pruebas
                   </button>
                   
                   <div id="message" class="message"></div>
                 </form>
               </div>
               
-              <div class="stats">
-                <p><strong>Último reporte generado:</strong> Run #${{ github.run_number }}</p>
-                <p><strong>Tag:</strong> ${{ steps.setup.outputs.tag }}</p>
-                <p><strong>Ambiente:</strong> ${{ steps.setup.outputs.ambiente }}</p>
-                <p><strong>Fecha:</strong> ${CURRENT_DATE}</p>
-              </div>
-              
-              <h2>📋 Historial de Ejecuciones</h2>
-              <ul class="report-list">
+              <!-- Reports Section -->
+              <div class="reports-section">
+                <h2><i class="fas fa-history"></i> Historial de Ejecuciones</h2>
+                <ul class="report-list">
           EOF
           
           # Agregar reporte actual primero
           cat >> gh-pages-temp/index.html << EOF
                 <li class="report-item">
                   <a class="report-link" href="reports/${{ github.run_number }}/karate-summary.html">
-                    📄 Reporte #${{ github.run_number }} - Tag: ${{ steps.setup.outputs.tag }}
+                    <i class="fas fa-file-alt"></i> Reporte #${{ github.run_number }} - Tag: ${{ steps.setup.outputs.tag }}
                   </a>
                   <span class="badge badge-new">NUEVO</span>
-                  <div class="report-date">Ambiente: ${{ steps.setup.outputs.ambiente }} | Fecha: ${CURRENT_DATE}</div>
+                  <div class="report-date">
+                    <span><i class="fas fa-globe"></i> Ambiente: ${{ steps.setup.outputs.ambiente }}</span>
+                    <span><i class="fas fa-clock"></i> Fecha: ${CURRENT_DATE}</span>
+                  </div>
                 </li>
           EOF
           
@@ -539,9 +1011,12 @@ jobs:
                   cat >> gh-pages-temp/index.html << EOF
               <li class="report-item">
                 <a class="report-link" href="$report_dir/karate-summary.html">
-                  📄 Reporte #$RUN_NUM - Tag: $TAG
+                  <i class="fas fa-file-alt"></i> Reporte #$RUN_NUM - Tag: $TAG
                 </a>
-                <div class="report-date">Ambiente: $AMBIENTE | Fecha: $FECHA</div>
+                <div class="report-date">
+                  <span><i class="fas fa-globe"></i> Ambiente: $AMBIENTE</span>
+                  <span><i class="fas fa-clock"></i> Fecha: $FECHA</span>
+                </div>
               </li>
           EOF
                 else
@@ -560,9 +1035,12 @@ jobs:
                   cat >> gh-pages-temp/index.html << EOF
               <li class="report-item">
                 <a class="report-link" href="$report_dir/karate-summary.html">
-                  📄 Reporte #$RUN_NUM
+                  <i class="fas fa-file-alt"></i> Reporte #$RUN_NUM
                 </a>
-                <div class="report-date">Reporte histórico | Fecha: $COMMIT_DATE</div>
+                <div class="report-date">
+                  <span><i class="fas fa-archive"></i> Reporte histórico</span>
+                  <span><i class="fas fa-clock"></i> Fecha: $COMMIT_DATE</span>
+                </div>
               </li>
           EOF
                 fi
@@ -574,11 +1052,58 @@ jobs:
           cat >> gh-pages-temp/index.html << 'EOF'
               </ul>
             </div>
+          </div>
+            
+            <!-- Chatbot -->
+            <div class="chatbot-container">
+              <button class="chatbot-button" onclick="toggleChatbot()">
+                <i class="fas fa-comments"></i>
+              </button>
+              
+              <div class="chatbot-window" id="chatbotWindow">
+                <div class="chatbot-header">
+                  <h3><i class="fas fa-robot"></i> Asistente QA</h3>
+                  <button class="chatbot-close" onclick="toggleChatbot()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                
+                <div class="chatbot-messages" id="chatMessages">
+                  <div class="chatbot-message bot">
+                    <div class="message-bubble">
+                      ¡Hola! 👋 Soy tu asistente de QA. ¿En qué puedo ayudarte?
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="chatbot-quick-questions">
+                  <button class="quick-question-btn" onclick="askQuestion('¿Cómo ejecuto pruebas?')">
+                    ❓ ¿Cómo ejecuto pruebas?
+                  </button>
+                  <button class="quick-question-btn" onclick="askQuestion('¿Qué son los tags?')">
+                    🏷️ ¿Qué son los tags?
+                  </button>
+                  <button class="quick-question-btn" onclick="askQuestion('¿Cómo veo reportes anteriores?')">
+                    📊 ¿Cómo veo reportes anteriores?
+                  </button>
+                  <button class="quick-question-btn" onclick="askQuestion('¿Qué es el GitHub Token?')">
+                    🔑 ¿Qué es el GitHub Token?
+                  </button>
+                </div>
+                
+                <div class="chatbot-input-area">
+                  <input type="text" class="chatbot-input" id="chatInput" placeholder="Escribe tu pregunta..." onkeypress="handleChatKeypress(event)">
+                  <button class="chatbot-send" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
             
             <!-- Modal de confirmación -->
             <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-              <div style="background:white; padding:30px; border-radius:8px; max-width:500px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-                <h3 style="color:#1a73e8; margin-top:0;">🚀 Confirmar Ejecución</h3>
+              <div style="background:white; padding:30px; border-radius:20px; max-width:500px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+                <h3 style="color:#1a73e8; margin-top:0;"><i class="fas fa-rocket"></i> Confirmar Ejecución</h3>
                 <p style="font-size:16px; color:#333; line-height:1.6;">
                   Las pruebas se ejecutarán en segundo plano y recibirás una notificación en tu correo <strong id="modalEmail"></strong> cuando finalicen.
                 </p>
@@ -586,10 +1111,10 @@ jobs:
                   Tag: <strong id="modalTag"></strong> | Ambiente: <strong id="modalAmbiente"></strong>
                 </p>
                 <div style="margin-top:25px; display:flex; gap:10px; justify-content:center;">
-                  <button onclick="cancelExecution()" style="background:#666; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-size:14px;">
+                  <button onclick="cancelExecution()" style="background:#666; color:white; padding:12px 24px; border:none; border-radius:10px; cursor:pointer; font-size:14px;">
                     Cancelar
                   </button>
-                  <button onclick="confirmExecution()" style="background:#1a73e8; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:bold;">
+                  <button onclick="confirmExecution()" style="background:linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color:white; padding:12px 24px; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-weight:bold;">
                     ✓ Confirmar y Ejecutar
                   </button>
                 </div>
@@ -603,13 +1128,100 @@ jobs:
               const confirmModal = document.getElementById('confirmModal');
               let formData = {};
               
+              // Chatbot functions
+              function toggleChatbot() {
+                const window = document.getElementById('chatbotWindow');
+                window.classList.toggle('active');
+              }
+              
+              function askQuestion(question) {
+                addMessage(question, 'user');
+                
+                setTimeout(() => {
+                  const answer = getAnswer(question);
+                  addMessage(answer, 'bot');
+                }, 500);
+              }
+              
+              function sendMessage() {
+                const input = document.getElementById('chatInput');
+                const question = input.value.trim();
+                
+                if (question) {
+                  addMessage(question, 'user');
+                  input.value = '';
+                  
+                  setTimeout(() => {
+                    const answer = getAnswer(question);
+                    addMessage(answer, 'bot');
+                  }, 500);
+                }
+              }
+              
+              function handleChatKeypress(event) {
+                if (event.key === 'Enter') {
+                  sendMessage();
+                }
+              }
+              
+              function addMessage(text, type) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chatbot-message ' + type;
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = text;
+                
+                messageDiv.appendChild(bubble);
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+              }
+              
+              function getAnswer(question) {
+                const q = question.toLowerCase();
+                
+                if (q.includes('ejecuto') || q.includes('ejecutar')) {
+                  return '🚀 Para ejecutar pruebas: 1) Ingresa tu GitHub Token, 2) Selecciona el tag (@login, @security, etc), 3) Elige el ambiente (DEV/QA), 4) Ingresa tu correo y 5) Haz clic en "Ejecutar Pruebas". Recibirás una notificación por email cuando finalicen.';
+                }
+                
+                if (q.includes('tag')) {
+                  return '🏷️ Los tags son etiquetas que agrupan escenarios de prueba. Por ejemplo: @login (pruebas de login), @security (pruebas de seguridad), @smoke (pruebas básicas), @misDatosAuxiliar (pruebas de datos de auxiliar). Puedes ejecutar un grupo específico usando su tag.';
+                }
+                
+                if (q.includes('reporte')) {
+                  return '📊 Los reportes anteriores se muestran en la lista de "Historial de Ejecuciones" más abajo. Cada reporte muestra el número de ejecución, tag usado, ambiente y fecha. Haz clic en cualquier enlace para ver los resultados detallados.';
+                }
+                
+                if (q.includes('token') || q.includes('github')) {
+                  return '🔑 El GitHub Token (PAT) es una clave de acceso que permite ejecutar workflows. Debes crear uno en GitHub con permiso "workflow". Ve a Settings > Developer settings > Personal access tokens > Generate new token. Es seguro, solo tú lo conoces.';
+                }
+                
+                if (q.includes('ambiente')) {
+                  return '🌍 Los ambientes son entornos donde se ejecutan las pruebas: DEV (desarrollo) para pruebas en progreso y QA (calidad) para pruebas oficiales antes de producción.';
+                }
+                
+                if (q.includes('karate')) {
+                  return '🥋 Karate es un framework de testing que permite escribir pruebas de API de forma sencilla usando archivos .feature con sintaxis Gherkin. Es ideal para testing de contratos de API.';
+                }
+                
+                if (q.includes('email') || q.includes('correo') || q.includes('notificación')) {
+                  return '📧 Recibirás dos emails: uno al iniciar las pruebas y otro al finalizar con los resultados. El email incluye un resumen de escenarios ejecutados y un enlace al reporte completo.';
+                }
+                
+                if (q.includes('ayuda') || q.includes('help')) {
+                  return '💡 Puedo ayudarte con: Ejecución de pruebas, tags, reportes, tokens de GitHub, ambientes, Karate y notificaciones. ¡Pregúntame lo que necesites!';
+                }
+                
+                return '🤔 Interesante pregunta. Te recomiendo usar las preguntas rápidas de arriba o preguntar sobre: ejecución de pruebas, tags, reportes, GitHub Token, ambientes, Karate o notificaciones.';
+              }
+              
               // Validación de campos
               function validateForm() {
                 const token = document.getElementById('githubToken').value.trim();
                 const tag = document.getElementById('tag').value.trim();
                 const correo = document.getElementById('correo').value.trim();
                 
-                // Validar token
                 if (!token) {
                   showError('⚠️ Por favor ingresa tu GitHub Token');
                   return false;
@@ -625,7 +1237,6 @@ jobs:
                   return false;
                 }
                 
-                // Validar tag
                 if (!tag) {
                   showError('⚠️ Por favor ingresa un tag para ejecutar');
                   return false;
@@ -636,7 +1247,6 @@ jobs:
                   return false;
                 }
                 
-                // Validar correo
                 if (!correo) {
                   showError('⚠️ Por favor ingresa un correo electrónico');
                   return false;
@@ -674,9 +1284,8 @@ jobs:
               async function confirmExecution() {
                 confirmModal.style.display = 'none';
                 
-                // Deshabilitar botón y mostrar loading
                 btnExecute.disabled = true;
-                btnExecute.textContent = '⏳ Ejecutando...';
+                btnExecute.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ejecutando...';
                 message.className = 'message';
                 message.style.display = 'none';
                 
@@ -704,7 +1313,6 @@ jobs:
                     form.reset();
                     document.getElementById('correo').value = '2101010261@undc.edu.pe';
                     
-                    // Recargar página después de 3 segundos
                     setTimeout(() => {
                       window.location.reload();
                     }, 3000);
@@ -717,7 +1325,7 @@ jobs:
                   message.textContent = '❌ Error al ejecutar las pruebas: ' + error.message + '. Verifica tu token y permisos.';
                 } finally {
                   btnExecute.disabled = false;
-                  btnExecute.textContent = '▶️ Ejecutar Pruebas';
+                  btnExecute.innerHTML = '<i class="fas fa-play"></i> Ejecutar Pruebas';
                   formData = {};
                 }
               }
@@ -725,12 +1333,10 @@ jobs:
               form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                // Validar formulario
                 if (!validateForm()) {
                   return;
                 }
                 
-                // Guardar datos del formulario
                 formData = {
                   token: document.getElementById('githubToken').value.trim(),
                   tag: document.getElementById('tag').value.trim(),
@@ -738,7 +1344,6 @@ jobs:
                   correo: document.getElementById('correo').value.trim()
                 };
                 
-                // Mostrar modal de confirmación
                 showConfirmModal();
               });
             </script>
