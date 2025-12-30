@@ -82,30 +82,6 @@
     }
     .badge-new { background: #34a853; color: white; }
     .info-text { color: #666; font-size: 13px; margin-top: 5px; }
-    .help-panel { background: #fff9e6; border-left: 4px solid #ff9800; margin-top: 20px; }
-    .help-header { color: #ff9800; margin-top: 0; }
-    .help-content { font-size: 14px; }
-    .help-section { 
-      margin-bottom: 25px; 
-      padding-bottom: 20px; 
-      border-bottom: 1px solid #eee;
-    }
-    .help-section:last-child { border-bottom: none; }
-    .help-section h3 { color: #333; margin-bottom: 15px; }
-    .help-item { 
-      margin: 12px 0; 
-      padding-left: 15px; 
-      border-left: 3px solid #ddd;
-      line-height: 1.6;
-    }
-    .help-item strong { color: #1a73e8; }
-    .help-item code { 
-      background: #f5f5f5; 
-      padding: 2px 6px; 
-      border-radius: 3px; 
-      font-family: monospace;
-      color: #d63384;
-    }
   </style>
 </head>
 <body>
@@ -150,21 +126,27 @@
     </div>
     
     <div class="stats">
-      <p><strong>Último reporte generado:</strong> Run #74</p>
-      <p><strong>Tag:</strong> @postLoginRolDirectivo</p>
+      <p><strong>Último reporte generado:</strong> Run #81</p>
+      <p><strong>Tag:</strong> @smoke</p>
       <p><strong>Ambiente:</strong> QA</p>
-      <p><strong>Fecha:</strong> 2025-12-29 13:46:30</p>
+      <p><strong>Fecha:</strong> 2025-12-30 09:55:23</p>
     </div>
     
     <h2>📋 Historial de Ejecuciones</h2>
     <ul class="report-list">
       <li class="report-item">
-        <a class="report-link" href="reports/74/karate-summary.html">
-          📄 Reporte #74 - Tag: @postLoginRolDirectivo
+        <a class="report-link" href="reports/81/karate-summary.html">
+          📄 Reporte #81 - Tag: @smoke
         </a>
         <span class="badge badge-new">NUEVO</span>
-        <div class="report-date">Ambiente: QA | Fecha: 2025-12-29 13:46:30</div>
+        <div class="report-date">Ambiente: QA | Fecha: 2025-12-30 09:55:23</div>
       </li>
+    <li class="report-item">
+      <a class="report-link" href="reports/74/karate-summary.html">
+        📄 Reporte #74
+      </a>
+      <div class="report-date">Reporte histórico | Fecha: 2025-12-29 18:46:28</div>
+    </li>
     <li class="report-item">
       <a class="report-link" href="reports/63/karate-summary.html">
         📄 Reporte #63
@@ -341,33 +323,6 @@
     </li>
     </ul>
   </div>
-            <div class="card help-panel">
-              <h2 class="help-header">📖 Guía de Uso de la Plataforma</h2>
-              <div class="help-content">
-                <div class="help-section">
-                  <h3>👨‍💻 Para Desarrolladores</h3>
-                  <div class="help-item"><strong>🔑 GitHub Token:</strong> Necesitas un Personal Access Token con permisos <code>actions:write</code>. Créalo en: Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token. Selecciona el scope <code>workflow</code>.</div>
-                  <div class="help-item"><strong>🏷️ Tags Disponibles:</strong> Usa tags de Karate para ejecutar grupos específicos de pruebas: <code>@login</code>, <code>@security</code>, <code>@smoke</code>, <code>@regression</code>, <code>@api</code>. Puedes combinar tags con operadores lógicos: <code>@smoke and @api</code> o <code>@regression and not @slow</code>.</div>
-                  <div class="help-item"><strong>🌐 Ambientes:</strong> Selecciona el ambiente donde se ejecutarán las pruebas. El archivo <code>karate-config.js</code> carga las configuraciones específicas de cada ambiente (URLs, credenciales, timeouts).</div>
-                  <div class="help-item"><strong>⚙️ Workflow Dispatch:</strong> Esta página usa la API de GitHub Actions <code>workflow_dispatch</code> para ejecutar el workflow manualmente con parámetros personalizados. El token se envía en el header <code>Authorization: Bearer</code>.</div>
-                </div>
-                <div class="help-section">
-                  <h3>🧪 Para QA Testers</h3>
-                  <div class="help-item"><strong>▶️ Ejecutar Pruebas:</strong> Completa todos los campos del formulario. El token lo proporciona tu líder técnico. Elige el tag según el tipo de prueba que necesites ejecutar. El correo es para notificaciones (opcional).</div>
-                  <div class="help-item"><strong>📊 Interpretar Resultados:</strong> Después de la ejecución, espera 2-5 minutos. Refresca la página y verás el nuevo reporte en la sección de Reportes Históricos. El reporte incluye: total de escenarios, pasados, fallidos, tiempo de ejecución y detalles de cada test.</div>
-                  <div class="help-item"><strong>🏷️ Tags Recomendados:</strong> <code>@smoke</code> (pruebas rápidas críticas), <code>@login</code> (autenticación), <code>@security</code> (seguridad), <code>@regression</code> (pruebas completas), <code>@misDatos</code> (endpoint de datos personales).</div>
-                  <div class="help-item"><strong>🔍 Debug:</strong> Si una prueba falla, abre el reporte HTML y navega al escenario fallido. Verás el request, response, assertions y logs detallados. También puedes revisar los logs del workflow en la pestaña Actions de GitHub.</div>
-                </div>
-                <div class="help-section">
-                  <h3>📈 Para Product Owners</h3>
-                  <div class="help-item"><strong>📊 Panel de Estadísticas:</strong> El dashboard muestra métricas clave en tiempo real: total de escenarios ejecutados, tasa de éxito, escenarios fallidos y duración de la suite. Estas métricas reflejan la calidad del último despliegue.</div>
-                  <div class="help-item"><strong>📜 Reportes Históricos:</strong> Cada ejecución genera un reporte inmutable con timestamp. Puedes comparar reportes entre sprints para identificar tendencias de calidad, regresiones o mejoras en el tiempo de ejecución.</div>
-                  <div class="help-item"><strong>🚀 Beneficios CI/CD:</strong> Las pruebas automatizadas se ejecutan en cada push/PR, garantizando que los cambios no rompan funcionalidad existente. Esto reduce bugs en producción, acelera el ciclo de desarrollo y aumenta la confianza del equipo.</div>
-                  <div class="help-item"><strong>✅ Indicadores de Calidad:</strong> Una tasa de éxito del 100% indica que todas las funcionalidades cumplen los criterios de aceptación. Si la tasa baja del 95%, es recomendable revisar los fallos antes de aprobar el release.</div>
-                  <div class="help-item"><strong>📧 Notificaciones:</strong> Los reportes se envían automáticamente al correo configurado. Puedes compartir reportes con stakeholders usando los enlaces permanentes de los reportes históricos.</div>
-                </div>
-              </div>
-            </div>
   
   <!-- Modal de confirmación -->
   <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
