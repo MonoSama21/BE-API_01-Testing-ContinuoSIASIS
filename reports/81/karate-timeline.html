@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Karate Timeline</title>
+    <style>
+      body, html { font-family: arial, sans-serif; font-size: 11pt; }
+      #visualization { box-sizing: border-box; width: 100%; height: 300px; }
+      .vis-item.failed { background-color: #F2928C; }
+      .page-heading { padding: 0.5em; margin-bottom: 0.5em; background-color: lightcyan; border: 1px solid gray; }
+    </style>
+    <script src="res/vis.min.js"></script>
+    <link href="res/vis.min.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class="page-heading">
+      <a href="karate-summary.html">Summary</a>
+    </div>     
+    <div id="visualization"></div>
+    <script>
+var groups = [{"content":"pool-2-thread-1","id":1},{"content":"pool-2-thread-2","id":2},{"content":"pool-2-thread-3","id":3},{"content":"pool-2-thread-4","id":4},{"content":"pool-2-thread-5","id":5}];
+var items = [{"id":1,"group":1,"content":"resources\/features\/Login\/POST-LoginRolAuxiliar[1:14]","start":1767106515004,"end":1767106519096,"title":"resources\/features\/Login\/POST-LoginRolAuxiliar[1:14] 14:55:15.004-14:55:19.096 Validar que el servicio de login responde correctamente para el rol auxiliar"},{"id":2,"group":2,"content":"resources\/features\/Login\/POST-LoginRolDirectivo[1:14]","start":1767106515005,"end":1767106519153,"title":"resources\/features\/Login\/POST-LoginRolDirectivo[1:14] 14:55:15.005-14:55:19.153 Validar que el servicio de login responde correctamente para el rol directivo","className":"failed"},{"id":3,"group":3,"content":"resources\/features\/Login\/POST-LoginRolPersonalAdministrativo[1:14]","start":1767106515047,"end":1767106519105,"title":"resources\/features\/Login\/POST-LoginRolPersonalAdministrativo[1:14] 14:55:15.047-14:55:19.105 Validar que el servicio de login responde correctamente para el rol personal administrativo (otro)"},{"id":4,"group":4,"content":"resources\/features\/Login\/POST-LoginRolProfesorPrimaria[1:14]","start":1767106515075,"end":1767106519655,"title":"resources\/features\/Login\/POST-LoginRolProfesorPrimaria[1:14] 14:55:15.075-14:55:19.655 Validar que el servicio de login responde correctamente para el rol profesor primaria"},{"id":5,"group":5,"content":"resources\/features\/Login\/POST-LoginRolProfesorSecundaria[1:14]","start":1767106515109,"end":1767106519741,"title":"resources\/features\/Login\/POST-LoginRolProfesorSecundaria[1:14] 14:55:15.109-14:55:19.741 Validar que el servicio de login responde correctamente para el rol profesor secundaria"},{"id":6,"group":1,"content":"resources\/features\/Login\/POST-LoginRolTutorSecundaria[1:14]","start":1767106519106,"end":1767106519865,"title":"resources\/features\/Login\/POST-LoginRolTutorSecundaria[1:14] 14:55:19.106-14:55:19.865 Validar que el servicio de login responde correctamente para el rol tutor secundaria"},{"id":7,"group":3,"content":"resources\/features\/MisDatos\/Auxiliar\/GET-MisDatosAuxiliar[1:15]","start":1767106519120,"end":1767106519372,"title":"resources\/features\/MisDatos\/Auxiliar\/GET-MisDatosAuxiliar[1:15] 14:55:19.120-14:55:19.372 Validar que el servicio de Mis Datos funciona para el rol Auxiliar","className":"failed"}];
+</script>
+    <script>
+      var container = document.getElementById('visualization');
+      var timeline = new vis.Timeline(container);
+      timeline.setOptions({groupOrder: 'content'});
+      timeline.setGroups(new vis.DataSet(groups));
+      timeline.setItems(new vis.DataSet(items));
+    </script>
+  </body>
+</html>
