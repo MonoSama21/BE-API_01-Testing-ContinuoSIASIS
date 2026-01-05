@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" href="res/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="res/karate-report.css" type="text/css"/>
+    <link rel="shortcut icon" href="favicon.ico"/>
+    <script type="text/javascript" src="res/jquery.min.js"></script>
+    <script type="text/javascript" src="res/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="res/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="res/bootstrap.min.js"></script>
+    <script type="text/javascript" src="res/karate-report.js"></script>
+    <script type="text/javascript" src="res/Resemble.js"></script>
+    <script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init('phc_M6fKk3dSX9HjglkqPSybauGas45NINb7EgsPGU8N9g1',{
+  api_host:'https://app.posthog.com',
+  persistence:'localStorage',
+  autocapture:false,
+  capture_pageview:false,
+  api_transport:'sendBeacon',
+  loaded: function(posthog) { 
+    posthog.capture("report_feature",{distinct_id:"7847fa5f-cb81-4075-a888-2bc4701236d1",karate_version:"1.5.1",karate_meta:null});
+  }
+});
+</script>
+
+    <title>resources.features.MisDatos.TutorSecundaria.PUT-MisDatosTutorSecundaria</title>
+  </head>
+  <body>
+    <div id="root-container">
+      <div id="leftnav">
+        
+        <div>
+  <div class="nav-logo">
+    <a href="https://karatelabs.io">
+      <img src="karate-labs-logo-ring.svg" alt="Karate Labs"/>
+    </a>
+    <div class="nav-count">
+      <div id="nav-pass" class="bg-success">1</div>
+      <div id="nav-fail" class="bg-danger">0</div>
+    </div>
+  </div>
+  <div id="nav-env">
+    <div>QA</div>
+  </div>
+  <div id="nav-type">
+    <div>Scenarios</div>
+  </div>
+  <div id="nav-date">
+    <div>2026-01-05 01:36:49 PM</div>
+  </div>
+</div>
+
+        <div class="nav-container">
+          <div class="nav-item passed">
+            <a href="#[1:11]"><span>[1:11]</span> <span>Validar que el servicio de actualizar Mis Datos por el rol Tutor Secundaria responde correctamente</span></a>
+          </div>
+        </div>
+      </div>
+      <div id="content">
+        <div class="page-heading alert alert-primary">
+          <a href="karate-summary.html">Summary</a><span class="feature-label">|</span>
+          <a href="karate-tags.html">Tags</a><span class="feature-label">|</span>
+          <span class="feature-label">Feature:</span>
+          <span class="feature-path">resources/features/MisDatos/TutorSecundaria/PUT-MisDatosTutorSecundaria.feature</span><span class="feature-label">|</span>
+          <span class="feature-name">Actualizar datos del rol Tutor Secundaria - Pruebas de Contrato API</span>
+          <span class="feature-description"></span>
+        </div>
+        <div class="scenario">
+          <div class="scenario-heading" id="[1:11]">
+            <div class="heading-container">
+              <div class="scenario-tags">
+                <a class="badge badge-primary" href="karate-tags.html">putMisDatosTutorSecundaria</a><a class="badge badge-primary" href="karate-tags.html">dailyTests</a><a class="badge badge-primary" href="karate-tags.html">tutorsecundaria</a>
+              </div>
+              <div class="scenario-keyword">
+                Scenario: <span>[1:11]</span>
+                <span class="scenario-name">Validar que el servicio de actualizar Mis Datos por el rol Tutor Secundaria responde correctamente</span>
+                <span></span>
+              </div>
+            </div>
+            <div class="scenario-time passed">
+              <span>ms:</span>&nbsp;<span>770</span>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-container" id="[1:11]bg">
+              <div class="step-ref bg-step">&gt;&gt;</div>
+              <div class="step-cell passed">Background:</div>
+            </div>
+            <div class="time-cell passed"></div>
+          </div>
+          <div data-parent="[1:11]bg"><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.5">
+      <div class="step-ref bg-step">5</div>
+      
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>url urlBase</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+  <div class="preformatted" data-parent="0.5">13:36:44.887 Ejecución de pruebas en ambiente de: QA 
+13:36:44.887 Ambiente cargado: QA 
+</div>   
+
+  
+
+</div>
+</div>
+          <div data-parent="[1:11]bg"><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.6">
+      <div class="step-ref bg-step">6</div>
+      
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>header Content-Type = &quot;application/json&quot;</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+          <div data-parent="[1:11]bg"><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.7">
+      <div class="step-ref bg-step">7</div>
+      
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>def result = call read(&#39;classpath:resources/features/Login/POST-LoginRolTutorSecundaria.feature@tokenTutorSecundaria&#39;)</span>
+      </div>
+    </div>
+    <div class="time-cell passed">310</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  <div>
+        
+    <div class="step-row">
+      <div class="step-container" id="0.7.0.call">
+        <div class="step-ref bg-step">&gt;&gt;</div>
+        <div class="step-indent"></div>
+        <div class="step-cell passed">resources.features.Login.POST-LoginRolTutorSecundaria</div>
+      </div>
+      <div class="time-cell passed">306</div>
+    </div>
+    <div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.5">
+      <div class="step-ref bg-step">5</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>url urlBase</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.6">
+      <div class="step-ref bg-step">6</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>header Content-Type = &quot;application/json&quot;</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.7">
+      <div class="step-ref bg-step">7</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>def requestExitoso = read(&quot;classpath:resources/functional/request/Auth/requestProfesorTutorSecundaria.json&quot;)</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.8">
+      <div class="step-ref bg-step">8</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>def schemas = read(&#39;classpath:resources/functional/schema/LoginSuccessResponse.json&#39;)</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.15">
+      <div class="step-ref bg-step">15</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>Given</span>&nbsp;<span>path &quot;api/login/profesor-tutor-secundaria&quot;</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.16">
+      <div class="step-ref bg-step">16</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>And</span>&nbsp;<span>request requestExitoso</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.17">
+      <div class="step-ref bg-step">17</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>When</span>&nbsp;<span>method POST</span>
+      </div>
+    </div>
+    <div class="time-cell passed">305</div>
+  </div>
+
+   
+  
+  
+
+  
+
+  <div class="preformatted" data-parent="0.7.0.call.0.17">13:36:44.892 request:
+1 &gt; POST https://api01-siasis-cert.vercel.app/api/login/profesor-tutor-secundaria
+1 &gt; Content-Type: application/json; charset=UTF-8
+1 &gt; Content-Length: 65
+1 &gt; Host: api01-siasis-cert.vercel.app
+1 &gt; Connection: Keep-Alive
+1 &gt; User-Agent: Apache-HttpClient/4.5.14 (Java/17.0.17)
+1 &gt; Accept-Encoding: gzip,deflate
+{
+  &quot;Nombre_Usuario&quot;: &quot;daniel_sanchez_1542&quot;,
+  &quot;Contraseña&quot;: &quot;15420745&quot;
+}
+
+
+13:36:45.196 response time in milliseconds: 304
+1 &lt; 200
+1 &lt; Access-Control-Allow-Origin: *
+1 &lt; Cache-Control: public, max-age=0, must-revalidate
+1 &lt; Content-Length: 519
+1 &lt; Content-Type: application/json; charset=utf-8
+1 &lt; Date: Mon, 05 Jan 2026 13:36:45 GMT
+1 &lt; Etag: W/&quot;207-m7tgyQ8GCoZeyGfZri8dUBjV4Sg&quot;
+1 &lt; Server: Vercel
+1 &lt; Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+1 &lt; X-Powered-By: Express
+1 &lt; X-Vercel-Cache: MISS
+1 &lt; X-Vercel-Id: iad1::iad1::tm8dt-1767620204911-c0c4bbc60999
+{
+  &quot;success&quot;: true,
+  &quot;message&quot;: &quot;Inicio de sesión exitoso&quot;,
+  &quot;data&quot;: {
+    &quot;Apellidos&quot;: &quot;Sanchez Gonzales&quot;,
+    &quot;Nombres&quot;: &quot;Daniel Enrique&quot;,
+    &quot;Rol&quot;: &quot;T&quot;,
+    &quot;token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRF9Vc3VhcmlvIjoiMTU0MjA3NDUiLCJOb21icmVfVXN1YXJpbyI6ImRhbmllbF9zYW5jaGV6XzE1NDIiLCJSRFAwMl9JTlNUQU5DRSI6IlJEUDAyX0lOUzEiLCJSRFAwM19JTlNUQU5DRSI6IlJEUDAzX0lOUzQiLCJSb2wiOiJUIiwiaWF0IjoxNzY3NjIwMjA1LCJleHAiOjE3Njc2MzgyMDV9.YClbvV203hWvSQjo1CKkxLsxwRdv1yIuhIhDTyNCuFQ&quot;,
+    &quot;Google_Drive_Foto_ID&quot;: &quot;1zX34iplUTuPQ1Xv64HfEAb6vFN9peVIw&quot;,
+    &quot;Genero&quot;: &quot;M&quot;
+  }
+}
+
+
+</div>   
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.18">
+      <div class="step-ref bg-step">18</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>Then</span>&nbsp;<span>status 200</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+      <div><div>
+  
+
+  
+
+  <div class="step-row" data-parent="0.7.0.call">
+    <div class="step-container" id="0.7.0.call.0.19">
+      <div class="step-ref bg-step">19</div>
+      <div class="step-indent"></div>
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>def token = response.data.token</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+    </div>    
+  </div>
+
+</div>
+</div>
+          <div data-parent="[1:11]bg"><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.8">
+      <div class="step-ref bg-step">8</div>
+      
+      <div class="step-cell passed">
+        <span>*</span>&nbsp;<span>def tutorSecundariaToken = result.token</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+          <div><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.12">
+      <div class="step-ref passed">12</div>
+      
+      <div class="step-cell passed">
+        <span>Given</span>&nbsp;<span>path &quot;/api/mis-datos&quot;</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+          <div><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.13">
+      <div class="step-ref passed">13</div>
+      
+      <div class="step-cell passed">
+        <span>And</span>&nbsp;<span>header Authorization = &#39;Bearer &#39; + tutorSecundariaToken</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+          <div><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.14">
+      <div class="step-ref passed">14</div>
+      
+      <div class="step-cell passed">
+        <span>And</span>&nbsp;<span>request</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  <div class="preformatted" data-parent="0.14">{
+    &quot;Celular&quot;: &quot;989728139&quot;
+}</div>
+
+  
+
+     
+
+  
+
+</div>
+</div>
+          <div><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.20">
+      <div class="step-ref passed">20</div>
+      
+      <div class="step-cell passed">
+        <span>When</span>&nbsp;<span>method PUT</span>
+      </div>
+    </div>
+    <div class="time-cell passed">460</div>
+  </div>
+
+   
+  
+  
+
+  
+
+  <div class="preformatted" data-parent="0.20">13:36:45.197 request:
+1 &gt; PUT https://api01-siasis-cert.vercel.app/api/mis-datos
+1 &gt; Content-Type: application/json; charset=UTF-8
+1 &gt; Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRF9Vc3VhcmlvIjoiMTU0MjA3NDUiLCJOb21icmVfVXN1YXJpbyI6ImRhbmllbF9zYW5jaGV6XzE1NDIiLCJSRFAwMl9JTlNUQU5DRSI6IlJEUDAyX0lOUzEiLCJSRFAwM19JTlNUQU5DRSI6IlJEUDAzX0lOUzQiLCJSb2wiOiJUIiwiaWF0IjoxNzY3NjIwMjA1LCJleHAiOjE3Njc2MzgyMDV9.YClbvV203hWvSQjo1CKkxLsxwRdv1yIuhIhDTyNCuFQ
+1 &gt; Content-Length: 23
+1 &gt; Host: api01-siasis-cert.vercel.app
+1 &gt; Connection: Keep-Alive
+1 &gt; User-Agent: Apache-HttpClient/4.5.14 (Java/17.0.17)
+1 &gt; Accept-Encoding: gzip,deflate
+{
+  &quot;Celular&quot;: &quot;989728139&quot;
+}
+
+
+13:36:45.657 response time in milliseconds: 459
+1 &lt; 200
+1 &lt; Access-Control-Allow-Origin: *
+1 &lt; Cache-Control: public, max-age=0, must-revalidate
+1 &lt; Content-Length: 92
+1 &lt; Content-Type: application/json; charset=utf-8
+1 &lt; Date: Mon, 05 Jan 2026 13:36:45 GMT
+1 &lt; Etag: W/&quot;5c-tsfMxy6sPPnBpNwJYCMXrx6J07k&quot;
+1 &lt; Server: Vercel
+1 &lt; Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+1 &lt; X-Powered-By: Express
+1 &lt; X-Vercel-Cache: MISS
+1 &lt; X-Vercel-Id: iad1::iad1::lkrlx-1767620205218-6843f0d35fe9
+{
+  &quot;success&quot;: true,
+  &quot;message&quot;: &quot;Datos actualizados correctamente&quot;,
+  &quot;data&quot;: {
+    &quot;Celular&quot;: &quot;989728139&quot;
+  }
+}
+
+
+</div>   
+
+  
+
+</div>
+</div>
+          <div><div>
+  
+
+  
+
+  <div class="step-row">
+    <div class="step-container" id="0.21">
+      <div class="step-ref passed">21</div>
+      
+      <div class="step-cell passed">
+        <span>Then</span>&nbsp;<span>status 200</span>
+      </div>
+    </div>
+    <div class="time-cell passed">0</div>
+  </div>
+
+   
+  
+  
+
+  
+
+     
+
+  
+
+</div>
+</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
